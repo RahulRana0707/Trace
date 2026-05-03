@@ -18,10 +18,10 @@ export function DashboardShell({
   user: UserData | null
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh min-h-0 overflow-hidden">
       <AppSidebar user={user} />
       <SidebarInset className="min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+        <header className="z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator

@@ -53,7 +53,7 @@ const data = {
           items: [
             { title: "MCP", url: "/connect/mcp" },
             { title: "API keys", url: "/connect/api-keys" },
-            { title: "Cursor rules", url: "/connect/cursor" },
+            { title: "Rules", url: "/connect/rules" },
           ],
         },
         {

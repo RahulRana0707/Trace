@@ -32,10 +32,10 @@ const ROUTE_BREADCRUMBS: Record<string, DashboardBreadcrumbSegment[]> = {
     { label: "Connect" },
     { label: "API keys" },
   ],
-  "/connect/cursor": [
+  "/connect/rules": [
     { label: "Overview", href: "/" },
     { label: "Connect" },
-    { label: "Cursor rules" },
+    { label: "Rules" },
   ],
   "/analytics": [
     { label: "Overview", href: "/" },

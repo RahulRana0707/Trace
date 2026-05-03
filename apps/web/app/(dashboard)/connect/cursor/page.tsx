@@ -1,10 +1,5 @@
-import { DashboardPagePlaceholder } from "@/components/dashboard/dashboard-page-placeholder"
+import { redirect } from "next/navigation"
 
-export default function ConnectCursorPage() {
-  return (
-    <DashboardPagePlaceholder
-      title="Cursor rules"
-      description="Copy a rules snippet and optional system prompt so Cursor (and similar editors) know when to log reasoning to trace and how to format payloads."
-    />
-  )
+export default function ConnectCursorRedirectPage() {
+  redirect("/connect/rules")
 }

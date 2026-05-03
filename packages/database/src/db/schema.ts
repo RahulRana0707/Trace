@@ -6,6 +6,7 @@ import {
   boolean,
   index,
   jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -136,6 +137,27 @@ export const memoryEntry = pgTable(
   ],
 );
 
+export const projectApiKey = pgTable(
+  "project_api_key",
+  {
+    id: text("id")
+      .primaryKey()
+      .default(sql`(gen_random_uuid())::text`),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    keyHash: text("key_hash").notNull(),
+    keyPrefix: text("key_prefix").notNull(),
+    name: text("name"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at"),
+  },
+  (table) => [
+    index("project_api_key_projectId_idx").on(table.projectId),
+    uniqueIndex("project_api_key_keyHash_unique").on(table.keyHash),
+  ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -162,11 +184,19 @@ export const projectRelations = relations(project, ({ one, many }) => ({
     references: [user.id],
   }),
   memoryEntries: many(memoryEntry),
+  apiKeys: many(projectApiKey),
 }));
 
 export const memoryEntryRelations = relations(memoryEntry, ({ one }) => ({
   project: one(project, {
     fields: [memoryEntry.projectId],
+    references: [project.id],
+  }),
+}));
+
+export const projectApiKeyRelations = relations(projectApiKey, ({ one }) => ({
+  project: one(project, {
+    fields: [projectApiKey.projectId],
     references: [project.id],
   }),
 }));

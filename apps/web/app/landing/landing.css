@@ -1,0 +1,38 @@
+@keyframes trace-landing-nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trace-landing-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trace-landing-nav-in {
+  animation: trace-landing-nav-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.trace-landing-hero-in {
+  animation: trace-landing-hero-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-landing-nav-in,
+  .trace-landing-hero-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

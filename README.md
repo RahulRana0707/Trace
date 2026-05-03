@@ -1,99 +1,174 @@
-TRACE
-Your AI agents finally have memory.
+# trace
 
-The One-Line Pitch
-trace gives your AI coding agents long-term memory — storing not what changed, but why.
+**Your AI agents finally have memory.**
 
-The Problem We're Solving
-Every AI coding agent — Cursor, Windsurf, Claude, any of them — suffers from the same fundamental flaw: they forget. Not just between sessions. They forget the reasoning. The psychology. The tradeoffs you considered three months ago when you restructured your auth system. The architectural decision you made at 2am that saved the project.
-Git remembers what changed. Nobody remembers why.
-When your agent picks up a project weeks later, it's essentially a new hire with no onboarding. It guesses. It makes decisions that contradict earlier ones. It repeats mistakes. It breaks things that were intentionally built a certain way.
-trace fixes this. It sits between your agent and your project — silently capturing the reasoning layer behind every significant change. So when your agent needs context from months ago, it can actually get it.
+trace is the memory layer for AI coding agents: it stores *why* decisions were made—not just *what* changed in git—so agents can retrieve real context instead of guessing.
 
-What trace Does
-For the Agent (via MCP)
+---
 
-Receives structured reasoning after every significant change
-Stores intent, alternatives considered, architecture impact, user goal
-Returns relevant past reasoning via RAG when agent queries it
-Works with any MCP-compatible agent out of the box
+## Contents
 
-For the Developer (via Dashboard)
+- [Problem](#problem)
+- [What trace does](#what-trace-does)
+- [Branding](#branding)
+- [MVP roadmap](#mvp-roadmap)
+- [Pricing (directional)](#pricing-directional)
+- [Vision](#vision)
+- [MVP success metric](#mvp-success-metric)
+- [Monorepo development](#monorepo-development)
 
-Full timeline of project decisions — searchable, filterable
-See what your agent was "thinking" at any point in the project
-Architecture snapshots — what did the folder structure look like in January?
-Query history — how often is your agent pulling old context, and is it helping?
+---
 
+## Problem
 
-Branding
-ElementDirectionNametraceTaglineYour AI agents finally have memoryPersonalitySharp, technical, no fluff. Built by developers for developers.Visual directionDark mode first. Deep navy + electric indigo accent. Monospace typography. Minimal.Logo conceptA stylized brain node — but geometric, not medical. Think circuit meets cognition.
-The name trace is intentional — it's the part of the brain responsible for memory, reasoning, and decision making. Exactly what you're giving agents.
+AI coding agents (Cursor, Windsurf, Claude, and others) lose context constantly—not only between sessions, but the *reasoning*: tradeoffs, intent, and architecture choices from weeks or months ago.
 
-MVP Scope (What You Build First)
-Phase 1 — Core (Months 1–2)
+- **Git** records *what* changed.
+- **Agents** often behave like a new hire with no onboarding: they contradict earlier decisions and repeat mistakes.
 
-MCP server that agents can connect to
-Structured schema agents send after each change (intent, files_touched, git_commit_ref, alternatives_considered, architecture_impact)
-Storage layer (Postgres + pgvector for RAG)
-Basic RAG retrieval — agent queries, trace returns relevant past reasoning
-User auth + project creation dashboard
-Cursor rules template — copy-paste system prompt users drop into their agent config
+trace captures that **reasoning layer** so agents can pull relevant past context when it matters.
 
-Phase 2 — Dashboard (Month 3)
+---
 
-Decision timeline UI — scrollable project history
-Search across all stored reasoning
-Architecture snapshot viewer — folder state at any past date (pulled from git ref)
-Basic analytics — entries stored, queries made, retrieval frequency
+## What trace does
 
-Phase 3 — Polish + Growth (Month 4)
+### For the agent (via MCP)
 
-Slack/email digest — weekly "what your agent decided this week"
-Public project memory (optional) — share your decision history with collaborators
-Onboarding flow improvements
-Waitlist → open freemium launch
+- Receives structured reasoning after significant changes.
+- Stores intent, alternatives considered, architecture impact, goals, and related metadata.
+- Returns relevant past reasoning via RAG when the agent queries it.
+- Works with MCP-compatible agents.
 
+### For the developer (via dashboard)
 
-Pricing
-Free — Hobbyist
+- Searchable, filterable timeline of project decisions.
+- Visibility into what the agent was “thinking” at a point in time.
+- Architecture snapshots (e.g. folder structure tied to history).
+- Query / usage signals (how often context is retrieved and whether it helps).
 
-1 project
-500 memory entries/month
-7-day history access
-Community support
+---
 
-$0 forever — enough to feel the value, not enough to run a real project long-term
+## Branding
 
-Pro — Builder — $19/month
+| | |
+| --- | --- |
+| **Name** | trace — evokes memory, reasoning, and decision-making (the “why” trail). |
+| **Tagline** | Your AI agents finally have memory. |
+| **Voice** | Sharp, technical, no fluff. Built by developers for developers. |
+| **Visual (product UI)** | **Dark mode first.** Cool **slate / near-black** surfaces (`--background` in dark theme), **teal–emerald primary** (`--primary`, chart greens)—aligned with the **Trace logo** accent (emerald `#10B981`). **Not** “electric indigo cyberpunk”; keep contrast calm and readable. Monospace-friendly, minimal chrome. |
+| **Logo direction** | Geometric “brain node”: circuit meets cognition—not clinical/medical. |
 
-5 projects
-10,000 memory entries/month
-Full history access
-RAG query analytics
-Priority support
+### Marketing / hero imagery
 
-Target: solo developers and indie hackers actively shipping products
+- **Role of the photo:** Atmospheric backdrop only. It should **not fight** the teal primary buttons and emerald logo; scenes that are **only warm tungsten / orange** read off-brand next to the UI.
+- **Current asset:** [`packages/ui/src/public/landing-bg.png`](packages/ui/src/public/landing-bg.png) — moody editorial still life. **Usable** if the page adds a **cool + subtle teal wash** over the image (done on `/landing`) so the scene harmonizes with tokens. For a tighter match long-term, **regenerate** with the prompt below (4K, cool-neutral shadows, **hint of teal** in light or bokeh only—still not sci-fi).
 
-Studio — Team — $59/month
+#### AI image prompt (4K hero, on-brand for trace)
 
-Unlimited projects
-50,000 memory entries/month
-Team dashboard (coming post-MVP)
-API access
-Dedicated support
+Use **3840×2160** (or **3840×1600**) PNG/WebP export from a high-bitrate master.
 
-Target: small teams — hold this tier back until Phase 2 is solid
+**Main prompt:**
 
-The "Why We're Building This" Narrative
-(This is your landing page hero copy, your Twitter bio, your Product Hunt launch story)
+> 4K UHD, 3840×2160, ultra-sharp, photoreal, natural color grading, **no upscale artifacts**.  
+> **Not futuristic, not sci-fi:** no holograms, neon grids, circuit boards, wireframe cities, robots, “AI brain,” lens-flare overload, CGI toy look.  
+>  
+> **Quiet editorial hero background** for a developer product named **trace** — *long-term memory and reasoning for AI coding agents* (intent, tradeoffs, architecture—not flashy tech).  
+> **Mood:** dark **slate and charcoal** shadows, **cool-neutral** overall; **one soft light** (moonlight or cool desk lamp, **not** dominant orange tungsten). Optional **very subtle teal or cyan** only in **rim light, edge bloom, or out-of-focus bokeh**—must stay **restrained** so **emerald/teal UI buttons** (hex ~#0d9488–#10b981 family) feel at home; **do not** flood the frame with green.  
+> **Subject:** extremely shallow depth of field — **matte paper, linen, or closed notebook** suggested, **no readable text**, no logos, no people, no hands. **Asymmetrical composition** with **clear negative space in the center third** for centered headline typography. Soft vignette at edges. Fine film grain, high micro-contrast.
 
-We've all been there. You open a project you haven't touched in two months. Your AI agent starts making changes — and immediately starts undoing decisions you spent days thinking through. It's not the agent's fault. It has no memory. It doesn't know what you were trying to build, what you already tried, or what you explicitly decided not to do.
-We're building trace because AI agents are getting incredibly good at executing — but they have no institutional memory. No context. No wisdom about your specific project. Every session is day one.
-trace is the memory layer that agents have always needed. It captures the reasoning behind every decision, stores it, and makes it instantly retrievable — so your agent can make smarter decisions based on real context, not wild guesses.
-Git remembers what. trace remembers why.
+**Negative prompt:**
 
+> warm orange cast only, tungsten-only interior, futuristic, sci-fi, cyberpunk, purple laser, holographic UI, stock photo people, cluttered desk in sharp focus, watermark, text, logo, cartoon, low resolution, JPEG blocking
 
-The One Metric That Matters for MVP
-Did the agent retrieve past context and make a better decision because of it?
-Everything else — entries stored, users signed up, dashboard pageviews — is noise until you can show this is actually working. Build a feedback loop into the MCP response so agents can confirm when retrieved context was useful.
+---
+
+## MVP roadmap
+
+### Phase 1 — Core (months 1–2)
+
+- MCP server agents can connect to.
+- Structured schema after each change (e.g. intent, `files_touched`, `git_commit_ref`, alternatives, architecture impact).
+- Storage: Postgres (+ pgvector for RAG when needed).
+- Basic RAG: agent queries → relevant past reasoning.
+- User auth + project creation in the dashboard.
+- Cursor rules / system prompt template for agent config.
+
+### Phase 2 — Dashboard (month 3)
+
+- Decision timeline UI (scrollable project history).
+- Search across stored reasoning.
+- Architecture snapshot viewer (e.g. folder state at a past git ref).
+- Basic analytics: entries stored, queries, retrieval frequency.
+
+### Phase 3 — Polish + growth (month 4)
+
+- Slack / email digest (“what your agent decided this week”).
+- Optional public / shared project memory.
+- Onboarding improvements.
+- Waitlist → freemium launch.
+
+---
+
+## Pricing (directional)
+
+| Tier | Price | Highlights |
+| --- | --- | --- |
+| **Free — Hobbyist** | $0 | 1 project · 500 memory entries/month · 7-day history · community support — enough to feel value, not to run a serious long-term project alone. |
+| **Pro — Builder** | $19/mo | 5 projects · 10k entries/month · full history · RAG analytics · priority support — solo devs / indie hackers shipping often. |
+| **Studio — Team** | $59/mo | Unlimited projects · 50k entries/month · team dashboard (post-MVP) · API · dedicated support — small teams; ship after Phase 2 is solid. |
+
+---
+
+## Vision
+
+Opening a project after weeks away shouldn’t mean the agent undoes decisions you spent days on. Agents are strong at execution but weak at **institutional memory** for *your* repo.
+
+trace exists so agents can decide from **recorded reasoning**, not guesses: capture the “why,” store it, retrieve it when queries fire—**Git remembers what; trace remembers why.**
+
+---
+
+## MVP success metric
+
+**Did the agent retrieve past context and make a better decision because of it?**
+
+Other metrics (signups, pageviews, raw entry counts) are secondary until that loop is provably working. Prefer a tight feedback path (e.g. in MCP responses) so agents or users can signal when retrieved context helped.
+
+---
+
+## Monorepo development
+
+### Prerequisites
+
+- **Node.js** ≥ 20  
+- **pnpm** 9 (`packageManager` is pinned in `package.json`)
+
+### Install
+
+```bash
+pnpm install
+```
+
+### Common scripts
+
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Start dev tasks via Turborepo (e.g. Next.js app). |
+| `pnpm build` | Production build (sets `dependsOn` and env expectations per `turbo.json`). |
+| `pnpm lint` | ESLint across the workspace. |
+| `pnpm format` | Prettier write for supported files. |
+| `pnpm typecheck` | TypeScript `tsc --noEmit` where configured. |
+
+### Layout
+
+| Path | Role |
+| --- | --- |
+| `apps/web` | Next.js dashboard and API routes. |
+| `packages/database` | Drizzle schema, queries, migrations. |
+| `packages/ui` | Shared UI components and styles. |
+| `packages/eslint-config` / `packages/typescript-config` | Shared tooling configs. |
+
+### Environment
+
+Build-related env vars are declared in `turbo.json` (e.g. `DATABASE_URL`, `BETTER_AUTH_URL`, OAuth client IDs/secrets). Configure `.env` locally for `apps/web` and database tooling as needed.
+
+Database scripts (`db:generate`, `db:migrate`, `db:push`, `db:studio`) live in `packages/database/package.json`.

@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { parseServerEnvelope } from "@/lib/api-parse"
-import { buildMcpServerJsonFragment } from "@/lib/connect/mcp-snippet"
+import {
+  TRACE_API_KEY_PLACEHOLDER,
+  buildHostedMcpServerJsonFragment,
+  getHostedMcpHttpUrlForSnippets,
+} from "@/lib/connect/mcp-snippet"
 import { toast } from "@trace/ui/components/sonner"
 
 export type ApiKeysPageProject = {
@@ -161,15 +165,32 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     [selectedProjectId, loadKeys]
   )
 
-  const mcpJsonWithRealSecret = useMemo(
+  const hostedMcpEndpoint = useMemo(() => getHostedMcpHttpUrlForSnippets(), [])
+
+  const hostedMcpSnippetAvailable = Boolean(hostedMcpEndpoint)
+
+  const hostedMcpJsonWithRealSecret = useMemo(
     () =>
-      createdSecret && selectedProjectId
-        ? buildMcpServerJsonFragment({
+      createdSecret && selectedProjectId && hostedMcpEndpoint
+        ? buildHostedMcpServerJsonFragment({
+            mcpUrl: hostedMcpEndpoint,
             apiKey: createdSecret,
             projectId: selectedProjectId,
           })
         : "",
-    [createdSecret, selectedProjectId]
+    [createdSecret, selectedProjectId, hostedMcpEndpoint]
+  )
+
+  const hostedMcpJsonPlaceholder = useMemo(
+    () =>
+      selectedProjectId && hostedMcpEndpoint
+        ? buildHostedMcpServerJsonFragment({
+            mcpUrl: hostedMcpEndpoint,
+            apiKey: TRACE_API_KEY_PLACEHOLDER,
+            projectId: selectedProjectId,
+          })
+        : "",
+    [selectedProjectId, hostedMcpEndpoint]
   )
 
   const onSuccessSheetOpenChange = useCallback((open: boolean) => {
@@ -192,6 +213,8 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     createdSecret,
     handleCreateKey,
     handleRevoke,
-    mcpJsonWithRealSecret,
+    hostedMcpSnippetAvailable,
+    hostedMcpJsonWithRealSecret,
+    hostedMcpJsonPlaceholder,
   }
 }

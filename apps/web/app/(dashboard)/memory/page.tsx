@@ -4,13 +4,6 @@ import { parseServerEnvelope } from "@/lib/api-parse"
 import { dashboardFetch } from "@/lib/dashboard-fetch"
 import { Button } from "@trace/ui/components/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@trace/ui/components/card"
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -19,6 +12,8 @@ import {
   EmptyTitle,
 } from "@trace/ui/components/empty"
 import { BrainCircuitIcon, ScrollTextIcon } from "lucide-react"
+
+import { MemoryPageClient } from "@/components/memory/memory-page-client"
 
 type ApiProject = {
   id: string
@@ -128,80 +123,11 @@ export default async function MemoryPage({
           </Empty>
         </div>
       ) : (
-        <>
-          <p className="text-sm text-muted-foreground">
-            Showing{" "}
-            <span className="font-medium text-foreground">{activeProjectName}</span>
-            {projectIdParam ? null : (
-              <span className="text-muted-foreground">
-                {" "}
-                (defaulting to your most recently updated project)
-              </span>
-            )}
-          </p>
-          {memories.length === 0 ? (
-            <div className="flex min-h-[min(40dvh,22rem)] w-full items-center justify-center py-6">
-              <Empty className="max-w-lg border border-dashed bg-muted/20">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <ScrollTextIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>No memory entries yet</EmptyTitle>
-                  <EmptyDescription>
-                    When your agent records intent and tradeoffs for this project,
-                    they will appear here in order.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {memories.map((m) => (
-                <li key={m.id}>
-                  <Card>
-                    <CardHeader className="gap-1 pb-2">
-                      <CardTitle className="text-base font-medium leading-snug">
-                        {m.intent}
-                      </CardTitle>
-                      <CardDescription className="font-mono text-xs">
-                        {m.createdAt}
-                        {m.gitCommitRef ? ` · ${m.gitCommitRef}` : ""}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm text-muted-foreground">
-                      {m.alternativesConsidered ? (
-                        <p>
-                          <span className="font-medium text-foreground">
-                            Alternatives:{" "}
-                          </span>
-                          {m.alternativesConsidered}
-                        </p>
-                      ) : null}
-                      {m.architectureImpact ? (
-                        <p>
-                          <span className="font-medium text-foreground">
-                            Architecture:{" "}
-                          </span>
-                          {m.architectureImpact}
-                        </p>
-                      ) : null}
-                      {m.filesTouched?.length ? (
-                        <p className="font-mono text-xs">
-                          Files: {m.filesTouched.join(", ")}
-                        </p>
-                      ) : null}
-                      {m.metadata && Object.keys(m.metadata).length > 0 ? (
-                        <pre className="max-h-32 overflow-auto rounded-md bg-muted/50 p-2 text-xs">
-                          {JSON.stringify(m.metadata, null, 2)}
-                        </pre>
-                      ) : null}
-                    </CardContent>
-                  </Card>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
+        <MemoryPageClient
+          projects={projects}
+          activeProjectId={activeProjectId}
+          memories={memories}
+        />
       )}
     </div>
   )

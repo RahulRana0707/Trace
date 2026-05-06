@@ -30,32 +30,45 @@ Rules and install snippets for this editor are not available yet. Use **Cursor**
 export const RULE_MARKDOWN_BY_TOOL: Record<RuleToolId, string> = {
   cursor: `## trace — agent rules (Cursor)
 
-You are working in a repo that uses **trace** for long-term **decision memory** (intent, tradeoffs, architecture—not just diffs). When the trace **MCP server** is connected and configured with \`TRACE_API_KEY\` and \`TRACE_PROJECT_ID\`, use it as follows.
+You are working in a repo that uses **trace** for long-term **decision memory** (intent, tradeoffs, architecture—not just diffs). Connect the **trace MCP** so you can call the tools below.
+
+### MCP setup
+
+Use **Hosted MCP (Streamable HTTP)**.
+
+Copy the configuration snippet from the trace dashboard (**Connect → MCP**) into Cursor MCP settings. It includes the MCP endpoint URL and an **Authorization: Bearer …** header using your API key (**Connect → API keys**).
+
+Some setups include optional headers such as **\`X-Trace-Project-Id\`**. If present, it must match the project bound to your API key.
+
+### MCP tools (exact names)
+
+Use only these tool names:
+
+| Tool | Purpose |
+|------|---------|
+| \`trace_ping\` | Cheap health check; confirms API key context and returns bound \`projectId\`. |
+| \`trace_store_memory\` | **Write** memory: required \`intent\`; optional \`alternativesConsidered\`, \`architectureImpact\`, \`filesTouched\`, \`gitCommitRef\`, \`metadata\`. |
+| \`trace_search_memory\` | **Search** (keyword): \`query\`, optional \`limit\` (≤25). |
+| \`trace_get_memory\` | **Get** one entry by \`id\`. |
+| \`trace_list_recent\` | **List** newest first: optional \`limit\`, \`cursor\`. |
+| \`trace_list_memories\` | Same list as \`trace_list_recent\`; project comes from the API key. |
 
 ### When to write memory
 
-After **meaningful** changes—not every tiny edit—call the trace tool that **stores structured reasoning** (exact tool name will match the MCP server, e.g. a \`store\` / \`remember\` / \`log_decision\`-style tool). Include:
-
-- **Intent** — what you were trying to achieve.
-- **Alternatives considered** — options you rejected and why (short).
-- **Architecture impact** — how this affects structure, boundaries, or future work.
-- **Files touched** — important paths (project-relative).
-- **Git** — commit ref or branch when available.
-
-Skip logging for trivial refactors, formatting-only edits, or when you have nothing substantive to add.
+After **meaningful** changes—not every tiny edit—call **\`trace_store_memory\`**. Include intent, alternatives, architecture impact, important paths, git ref when useful. Skip trivial edits.
 
 ### When to read memory
 
-Before large refactors, API changes, dependency upgrades, or when the user asks “what did we decide before?”, **query trace** (search / recall tool provided by MCP) and **summarize** relevant past decisions in your reply. Prefer recent, project-scoped context; do not paste huge payloads back unless the user needs them.
+Before large refactors, API changes, dependency upgrades, or when the user asks what was decided before, use **\`trace_search_memory\`**, **\`trace_list_recent\`**, **\`trace_list_memories\`**, or **\`trace_get_memory\`** and **summarize** in your reply. Do not paste huge payloads unless the user needs them.
 
 ### Tone and safety
 
-- Do **not** put secrets, tokens, or API keys into trace payloads.
-- Prefer concise, durable phrasing so future sessions can scan results quickly.
+- Do **not** put unrelated secrets, tokens, or API keys into trace payload fields.
+- Prefer concise, durable phrasing.
 
-### Cursor setup
+### Cursor rules file
 
-Add this file under **Cursor rules** (e.g. \`.cursor/rules/trace.mdc\` or Project Rules) so it applies in every session for this workspace.
+Add this content under **Cursor → Rules** (e.g. \`.cursor/rules/trace.mdc\` in the **client** repo, or Project Rules) so it applies in every session for that workspace.
 
 `,
 

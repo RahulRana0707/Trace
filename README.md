@@ -164,6 +164,7 @@ pnpm install
 | --- | --- |
 | `apps/web` | Next.js dashboard and API routes. |
 | `packages/database` | Drizzle schema, queries, migrations. |
+| `packages/trace-mcp` | Hosted **Streamable HTTP** MCP server: tools use **Postgres** via `DATABASE_URL` and `@trace/database` (API key from `Authorization: Bearer`). |
 | `packages/ui` | Shared UI components and styles. |
 | `packages/eslint-config` / `packages/typescript-config` | Shared tooling configs. |
 
@@ -172,3 +173,13 @@ pnpm install
 Build-related env vars are declared in `turbo.json` (e.g. `DATABASE_URL`, `BETTER_AUTH_URL`, OAuth client IDs/secrets). Configure `.env` locally for `apps/web` and database tooling as needed.
 
 Database scripts (`db:generate`, `db:migrate`, `db:push`, `db:studio`) live in `packages/database/package.json`.
+
+### Hosted MCP (`packages/trace-mcp`)
+
+- **`DATABASE_URL`** (required): same Postgres connection string as the web app / Drizzle migrations. The MCP process loads `@trace/database` and runs queries directly (Next.js does **not** need to be running for tool calls).
+- **`PORT`**: listen port for the MCP HTTP server (default **`8080`**). Terminate TLS at your reverse proxy in production.
+- **`.env` / cwd:** `packages/trace-mcp/src/env-guard.ts` loads `dotenv/config` first; put `DATABASE_URL` in `packages/trace-mcp/.env` when you start the process from that directory, or export it in the shell.
+- **Dashboard / copy UX:** Connect ships a hosted MCP snippet when **`NEXT_PUBLIC_TRACE_MCP_HTTP_URL`** is set for `apps/web` (absolute URL, normalized to end with `/mcp`). Snippets include **`Authorization: Bearer …`** using an API key; some setups also include optional **`X-Trace-Project-Id`**. **API keys** exposes the same hosted MCP JSON copy affordances when that URL is configured.
+- **Optional HTTP agent API:** `apps/web/app/api/agent/*` remains available for Bearer-authenticated HTTP clients; **MCP no longer calls Next** for tools.
+
+Run the MCP HTTP process locally: from repo root, `pnpm --filter @trace/trace-mcp mcp` (compile + start), or `pnpm --filter @trace/trace-mcp build` then `pnpm --filter @trace/trace-mcp serve` (see `packages/trace-mcp/package.json`). This is separate from root `pnpm dev` (Next.js only).

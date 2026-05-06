@@ -1,0 +1,1 @@
+ALTER TABLE "project_api_key" ADD COLUMN "secret_ciphertext" text;

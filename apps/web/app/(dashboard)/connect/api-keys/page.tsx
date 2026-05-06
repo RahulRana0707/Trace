@@ -35,8 +35,7 @@ export default async function ConnectApiKeysPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">API keys</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Create keys scoped to a project. Use the key and project ID in MCP
-          configuration so agents authenticate to the right memory workspace.
+          Create keys scoped to a project.
         </p>
       </div>
 

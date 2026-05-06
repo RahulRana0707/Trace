@@ -29,6 +29,13 @@
       "when": 1777806737278,
       "tag": "0003_boring_proteus",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1777825302302,
+      "tag": "0004_api_key_secret_vault",
+      "breakpoints": true
     }
   ]
 }

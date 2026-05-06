@@ -1,17 +1,14 @@
-import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import * as z from "zod"
 
+import { requireAgentAuth } from "@/lib/agent-auth"
 import { jsonServerError, jsonSuccess } from "@/lib/api-response"
+import { serializeMemory } from "@/lib/serialize-memory"
 import { ServerResponseType } from "@/types/server"
-import { auth } from "@/lib/auth"
 import {
-  getOwnedProject,
   insertMemoryEntry,
   listMemoryEntriesForProject,
 } from "@trace/database"
-
-import { serializeMemory } from "@/lib/serialize-memory"
 
 const createMemoryBody = z.object({
   intent: z.string().min(1).max(50_000),
@@ -22,22 +19,9 @@ const createMemoryBody = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ projectId: string }> }
-) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-  if (!session) {
-    return jsonServerError("Unauthorized", 401)
-  }
-
-  const { projectId } = await context.params
-  const project = await getOwnedProject(projectId, session.user.id)
-  if (!project) {
-    return jsonServerError("Not found", 404)
-  }
+export async function GET(request: Request) {
+  const auth = await requireAgentAuth(request)
+  if ("error" in auth) return auth.error
 
   const url = new URL(request.url)
   const limitRaw = url.searchParams.get("limit")
@@ -48,7 +32,7 @@ export async function GET(
   const cursorParam = url.searchParams.get("cursor")
 
   const result = await listMemoryEntriesForProject({
-    projectId,
+    projectId: auth.projectId,
     limit,
     cursor: cursorParam,
   })
@@ -67,22 +51,9 @@ export async function GET(
   })
 }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ projectId: string }> }
-) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-  if (!session) {
-    return jsonServerError("Unauthorized", 401)
-  }
-
-  const { projectId } = await context.params
-  const project = await getOwnedProject(projectId, session.user.id)
-  if (!project) {
-    return jsonServerError("Not found", 404)
-  }
+export async function POST(request: Request) {
+  const auth = await requireAgentAuth(request)
+  if ("error" in auth) return auth.error
 
   let body: unknown
   try {
@@ -113,7 +84,7 @@ export async function POST(
   } = parsed.data
 
   const inserted = await insertMemoryEntry({
-    projectId,
+    projectId: auth.projectId,
     intent,
     alternativesConsidered: alternativesConsidered ?? null,
     architectureImpact: architectureImpact ?? null,

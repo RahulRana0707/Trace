@@ -4,10 +4,10 @@ import {
   apiKeyDisplayPrefix,
   generateApiKeyPlaintext,
   hashApiKeyPlaintext,
-} from "../crypto-api-key"
-import * as schema from "../db/schema"
-import { db } from "../db"
-import { getOwnedProject } from "./projects-memory"
+} from "../crypto-api-key.js"
+import * as schema from "../db/schema.js"
+import { db } from "../db.js"
+import { getOwnedProject } from "./projects-memory.js"
 
 export type ProjectApiKeyListRow = {
   id: string
@@ -16,6 +16,32 @@ export type ProjectApiKeyListRow = {
   name: string | null
   createdAt: Date
   revokedAt: Date | null
+}
+
+/** Resolve a plaintext API key to its project (active keys only). Used by MCP / agent HTTP. */
+export async function resolveActiveApiKeyToProject(
+  plaintextKey: string
+): Promise<{ keyId: string; projectId: string } | null> {
+  const trimmed = plaintextKey.trim()
+  if (!trimmed) return null
+
+  const keyHash = hashApiKeyPlaintext(trimmed)
+  const [row] = await db
+    .select({
+      id: schema.projectApiKey.id,
+      projectId: schema.projectApiKey.projectId,
+    })
+    .from(schema.projectApiKey)
+    .where(
+      and(
+        eq(schema.projectApiKey.keyHash, keyHash),
+        isNull(schema.projectApiKey.revokedAt)
+      )
+    )
+    .limit(1)
+
+  if (!row) return null
+  return { keyId: row.id, projectId: row.projectId }
 }
 
 export async function listApiKeysForProject(

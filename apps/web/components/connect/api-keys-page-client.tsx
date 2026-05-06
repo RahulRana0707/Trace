@@ -8,11 +8,6 @@ import {
   type ApiKeysPageProject,
   useApiKeysPage,
 } from "@/hooks/use-api-keys-page"
-import {
-  TRACE_API_KEY_PLACEHOLDER,
-  buildMcpServerJsonFragment,
-  getTraceMcpNpxSpecifier,
-} from "@/lib/connect/mcp-snippet"
 import { formatShortDate } from "@/lib/format-short-date"
 import { Button } from "@trace/ui/components/button"
 import {
@@ -115,7 +110,9 @@ export function ApiKeysPageClient({
     createdSecret,
     handleCreateKey,
     handleRevoke,
-    mcpJsonWithRealSecret,
+    hostedMcpSnippetAvailable,
+    hostedMcpJsonWithRealSecret,
+    hostedMcpJsonPlaceholder,
   } = useApiKeysPage({ projects })
 
   if (projectsLoadError) {
@@ -169,13 +166,6 @@ export function ApiKeysPageClient({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
-              New keys belong to this project. Use the project ID in MCP as{" "}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[0.7rem]">
-                TRACE_PROJECT_ID
-              </code>
-              .
-            </p>
           </div>
 
           {selectedProject ? (
@@ -219,24 +209,6 @@ export function ApiKeysPageClient({
         </div>
       </section>
 
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        MCP JSON uses{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-[0.7rem]">
-          {TRACE_API_KEY_PLACEHOLDER}
-        </code>{" "}
-        when you copy from the table—paste your saved secret. Right after
-        creating a key, the success panel includes JSON with the real secret.
-        The trace MCP package is not published yet;{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-[0.7rem]">
-          npx -y {getTraceMcpNpxSpecifier()}
-        </code>{" "}
-        will apply once the server ships (override with{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-[0.7rem]">
-          NEXT_PUBLIC_TRACE_MCP_NPX_PACKAGE
-        </code>
-        ).
-      </p>
-
       <div>
         <h2 className="text-lg font-semibold tracking-tight">API keys</h2>
         {keysError ? (
@@ -255,22 +227,24 @@ export function ApiKeysPageClient({
                   <KeyRoundIcon />
                 </EmptyMedia>
                 <EmptyTitle>No API keys for this project</EmptyTitle>
-                <EmptyDescription>
-                  Create a key above. You will only see the secret once—copy it
-                  for MCP and keep it somewhere safe.
-                </EmptyDescription>
+                <EmptyDescription>Create a key above.</EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
-            <div className="overflow-hidden rounded-lg border">
+            <div className="rounded-xl border border-border bg-card ring-1 ring-foreground/10">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Key</TableHead>
-                    <TableHead>Label</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead scope="col">Key</TableHead>
+                    <TableHead scope="col">Label</TableHead>
+                    <TableHead scope="col">Project</TableHead>
+                    <TableHead scope="col" className="whitespace-nowrap">
+                      Created
+                    </TableHead>
+                    <TableHead scope="col">Status</TableHead>
+                    <TableHead scope="col" className="text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -283,6 +257,9 @@ export function ApiKeysPageClient({
                         </TableCell>
                         <TableCell className="text-sm">
                           {k.name ?? "—"}
+                        </TableCell>
+                        <TableCell className="max-w-[12rem] truncate text-sm text-muted-foreground">
+                          {selectedProject?.name ?? "—"}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatShortDate(k.createdAt)}
@@ -301,16 +278,17 @@ export function ApiKeysPageClient({
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             {active && selectedProjectId ? (
-                              <CopyButton
-                                label="MCP JSON"
-                                text={buildMcpServerJsonFragment({
-                                  apiKey: TRACE_API_KEY_PLACEHOLDER,
-                                  projectId: selectedProjectId,
-                                })}
-                                variant="secondary"
-                              >
-                                Copy MCP JSON
-                              </CopyButton>
+                              <>
+                                {hostedMcpSnippetAvailable ? (
+                                  <CopyButton
+                                    label="hosted MCP JSON"
+                                    text={hostedMcpJsonPlaceholder}
+                                    variant="secondary"
+                                  >
+                                    Copy hosted MCP JSON
+                                  </CopyButton>
+                                ) : null}
+                              </>
                             ) : null}
                             {active ? (
                               <Button
@@ -367,18 +345,18 @@ export function ApiKeysPageClient({
                 </div>
               </div>
             ) : null}
-            {mcpJsonWithRealSecret ? (
+            {hostedMcpSnippetAvailable && hostedMcpJsonWithRealSecret ? (
               <div className="flex flex-col gap-2">
-                <Label>MCP JSON</Label>
+                <Label>MCP JSON (hosted URL)</Label>
                 <pre className="max-h-48 overflow-auto rounded-md border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
-                  {mcpJsonWithRealSecret}
+                  {hostedMcpJsonWithRealSecret}
                 </pre>
                 <CopyButton
-                  label="MCP JSON"
-                  text={mcpJsonWithRealSecret}
+                  label="MCP JSON (hosted)"
+                  text={hostedMcpJsonWithRealSecret}
                   variant="default"
                 >
-                  Copy MCP JSON
+                  Copy hosted MCP JSON
                 </CopyButton>
               </div>
             ) : null}

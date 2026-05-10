@@ -1,7 +1,9 @@
 "use server"
 
 import { headers } from "next/headers"
+import { APIError } from "better-auth/api"
 
+import { auth } from "@/lib/auth"
 import { authClient } from "@/lib/auth-client"
 import { ServerResponseType, type ServerResponse } from "@/types/server"
 
@@ -93,25 +95,23 @@ export async function signUp(input: SignUpInput): Promise<ServerResponse> {
 
 export async function signOut(): Promise<ServerResponse> {
   try {
-    const result = await authClient.signOut({
-      fetchOptions: {
-        headers: await headers(),
-      },
+    const requestHeaders = await headers()
+    await auth.api.signOut({
+      headers: new Headers(requestHeaders),
     })
-
-    if (result.error) {
-      return {
-        status: ServerResponseType.ERROR,
-        data: null,
-        errorMessage: result.error.message ?? "Could not sign out.",
-      }
-    }
 
     return {
       status: ServerResponseType.SUCCESS,
-      data: result.data,
+      data: null,
     }
   } catch (error) {
+    if (error instanceof APIError) {
+      return {
+        status: ServerResponseType.ERROR,
+        data: null,
+        errorMessage: error.message ?? "Could not sign out.",
+      }
+    }
     console.error("signOut", error)
     return {
       status: ServerResponseType.ERROR,

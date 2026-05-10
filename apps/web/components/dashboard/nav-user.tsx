@@ -1,16 +1,22 @@
 "use client"
 
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
+  Loader2,
   LogOut,
   Sparkles,
 } from "lucide-react"
 
+import { signOut } from "@/actions/auth"
 import type { UserData } from "@/lib/get-user-data"
+import { ServerResponseType } from "@/types/server"
+import { toast } from "@trace/ui/components/sonner"
 import { Avatar, AvatarFallback } from "@trace/ui/components/avatar"
 import {
   DropdownMenu,
@@ -74,6 +80,14 @@ function ProfileAvatar({
 
 export function NavUser({ user }: { user: UserData | null }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [isSigningOut, startSignOutTransition] = useTransition()
+
+  function handleAccountMenuOpenChange(next: boolean) {
+    if (!next && isSigningOut) return
+    setAccountMenuOpen(next)
+  }
 
   const display = user ?? {
     id: "",
@@ -82,10 +96,32 @@ export function NavUser({ user }: { user: UserData | null }) {
     image: null,
   }
 
+  function handleSignOut() {
+    startSignOutTransition(async () => {
+      try {
+        const result = await signOut()
+        if (result.status === ServerResponseType.ERROR) {
+          toast.error(result.errorMessage ?? "Could not sign out.")
+          setAccountMenuOpen(false)
+          return
+        }
+        router.replace("/")
+        router.refresh()
+        setAccountMenuOpen(false)
+      } catch {
+        toast.error("Something went wrong. Please try again.")
+        setAccountMenuOpen(false)
+      }
+    })
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu
+          open={accountMenuOpen}
+          onOpenChange={handleAccountMenuOpenChange}
+        >
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -141,8 +177,18 @@ export function NavUser({ user }: { user: UserData | null }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
+            <DropdownMenuItem
+              disabled={isSigningOut}
+              onSelect={(event) => {
+                event.preventDefault()
+                handleSignOut()
+              }}
+            >
+              {isSigningOut ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <LogOut />
+              )}
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

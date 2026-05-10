@@ -9,42 +9,31 @@ function normalizePathname(pathname: string) {
   return pathname.replace(/\/+$/, "") || "/"
 }
 
+const OVERVIEW: DashboardBreadcrumbSegment = {
+  label: "Overview",
+  href: "/dashboard/overview",
+}
+
 /**
  * Breadcrumb trail for each dashboard route. Last segment is always the current page (no href).
  */
 const ROUTE_BREADCRUMBS: Record<string, DashboardBreadcrumbSegment[]> = {
-  "/": [{ label: "Overview" }],
-  "/projects": [
-    { label: "Overview", href: "/" },
-    { label: "Projects" },
-  ],
-  "/memory": [
-    { label: "Overview", href: "/" },
-    { label: "Memory" },
-  ],
-  "/connect/mcp": [
-    { label: "Overview", href: "/" },
-    { label: "Connect" },
-    { label: "MCP" },
-  ],
-  "/connect/api-keys": [
-    { label: "Overview", href: "/" },
+  "/dashboard/overview": [{ label: "Overview" }],
+  "/dashboard/projects": [OVERVIEW, { label: "Projects" }],
+  "/dashboard/memory": [OVERVIEW, { label: "Memory" }],
+  "/dashboard/connect/mcp": [OVERVIEW, { label: "Connect" }, { label: "MCP" }],
+  "/dashboard/connect/api-keys": [
+    OVERVIEW,
     { label: "Connect" },
     { label: "API keys" },
   ],
-  "/connect/rules": [
-    { label: "Overview", href: "/" },
+  "/dashboard/connect/rules": [
+    OVERVIEW,
     { label: "Connect" },
     { label: "Rules" },
   ],
-  "/analytics": [
-    { label: "Overview", href: "/" },
-    { label: "Analytics" },
-  ],
-  "/settings": [
-    { label: "Overview", href: "/" },
-    { label: "Settings" },
-  ],
+  "/dashboard/analytics": [OVERVIEW, { label: "Analytics" }],
+  "/dashboard/settings": [OVERVIEW, { label: "Settings" }],
 }
 
 export function getDashboardBreadcrumbs(
@@ -53,7 +42,7 @@ export function getDashboardBreadcrumbs(
   const path = normalizePathname(pathname)
   return (
     ROUTE_BREADCRUMBS[path] ?? [
-      { label: "Overview", href: "/" },
+      OVERVIEW,
       { label: "Not found" },
     ]
   )

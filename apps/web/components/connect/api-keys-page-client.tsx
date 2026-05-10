@@ -134,7 +134,7 @@ export function ApiKeysPageClient({
         </EmptyHeader>
         <EmptyContent>
           <Button asChild>
-            <Link href="/projects">Go to projects</Link>
+            <Link href="/dashboard/projects">Go to projects</Link>
           </Button>
         </EmptyContent>
       </Empty>

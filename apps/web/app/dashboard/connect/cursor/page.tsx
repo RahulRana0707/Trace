@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function ConnectCursorRedirectPage() {
-  redirect("/connect/rules")
+  redirect("/dashboard/connect/rules")
 }

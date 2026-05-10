@@ -123,7 +123,7 @@ function SocialButtons({ authFlow }: { authFlow: "login" | "signup" }) {
       setPending(provider)
       const result = await authClient.signIn.social({
         provider,
-        callbackURL: "/",
+        callbackURL: "/dashboard/overview",
         errorCallbackURL,
       })
 
@@ -192,7 +192,7 @@ function LoginForm() {
         return
       }
 
-      router.replace("/")
+      router.replace("/dashboard/overview")
       router.refresh()
     } catch {
       toast.error("Something went wrong. Please try again.")
@@ -286,7 +286,7 @@ function SignupForm() {
         return
       }
 
-      router.replace("/")
+      router.replace("/dashboard/overview")
       router.refresh()
     } catch {
       toast.error("Something went wrong. Please try again.")

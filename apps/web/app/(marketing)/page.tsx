@@ -1,12 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
+import { headers } from "next/headers"
 
 import landingBg from "@trace/ui/public/landing-bg.png"
 import { TraceLogo } from "@trace/ui/components/logo"
 import { Button } from "@trace/ui/components/button"
 import { cn } from "@trace/ui/lib/utils"
+import { auth } from "@/lib/auth"
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
       <Image
@@ -46,7 +52,7 @@ export default function LandingPage() {
           )}
         >
           <Link
-            href="/landing"
+            href="/"
             className="flex items-center gap-2 rounded-full px-1 py-0.5 text-white ring-offset-2 ring-offset-transparent transition-opacity outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/80"
           >
             <TraceLogo
@@ -60,17 +66,25 @@ export default function LandingPage() {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10 hover:text-white"
-              asChild
-            >
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button size="sm" className="shadow-sm" asChild>
-              <Link href="/">Get started</Link>
-            </Button>
+            {session ? (
+              <Button size="sm" className="shadow-sm" asChild>
+                <Link href="/dashboard/overview">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 hover:text-white"
+                  asChild
+                >
+                  <Link href="/login">Sign in</Link>
+                </Button>
+                <Button size="sm" className="shadow-sm" asChild>
+                  <Link href="/dashboard/overview">Get started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
       </header>
@@ -92,17 +106,25 @@ export default function LandingPage() {
             Git remembers what. trace remembers why.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Button size="lg" className="shadow-md" asChild>
-              <Link href="/">Get started</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/40 bg-white/5 text-white backdrop-blur-sm hover:bg-white/10 hover:text-white"
-              asChild
-            >
-              <Link href="/login">Sign in</Link>
-            </Button>
+            {session ? (
+              <Button size="lg" className="shadow-md" asChild>
+                <Link href="/dashboard/overview">Open dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button size="lg" className="shadow-md" asChild>
+                  <Link href="/dashboard/overview">Get started</Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/40 bg-white/5 text-white backdrop-blur-sm hover:bg-white/10 hover:text-white"
+                  asChild
+                >
+                  <Link href="/login">Sign in</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </main>

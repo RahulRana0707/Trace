@@ -37,7 +37,7 @@ export function McpSetupSnippets() {
         <h2 className="text-lg font-semibold tracking-tight">Hosted MCP (HTTP)</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Connect trace via MCP using your API key from{" "}
-          <a className="text-primary underline-offset-4 hover:underline" href="/connect/api-keys">
+          <a className="text-primary underline-offset-4 hover:underline" href="/dashboard/connect/api-keys">
             API keys
           </a>
           . Paste the key into <code className="font-mono text-xs">Authorization</code> as{" "}

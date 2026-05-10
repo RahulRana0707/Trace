@@ -80,7 +80,7 @@ export function MemoryPageClient({
             value={activeProjectId}
             onValueChange={(nextId) => {
               startTransition(() => {
-                router.push(`/memory?project=${encodeURIComponent(nextId)}`)
+                router.push(`/dashboard/memory?project=${encodeURIComponent(nextId)}`)
               })
             }}
             disabled={pending}

@@ -33,17 +33,17 @@ const data = {
       items: [
         {
           title: "Overview",
-          url: "/",
+          url: "/dashboard/overview",
           icon: LayoutDashboard,
         },
         {
           title: "Projects",
-          url: "/projects",
+          url: "/dashboard/projects",
           icon: FolderKanban,
         },
         {
           title: "Memory",
-          url: "/memory",
+          url: "/dashboard/memory",
           icon: History,
         },
         {
@@ -51,19 +51,19 @@ const data = {
           icon: Plug2,
           isActive: true,
           items: [
-            { title: "MCP", url: "/connect/mcp" },
-            { title: "API keys", url: "/connect/api-keys" },
-            { title: "Rules", url: "/connect/rules" },
+            { title: "MCP", url: "/dashboard/connect/mcp" },
+            { title: "API keys", url: "/dashboard/connect/api-keys" },
+            { title: "Rules", url: "/dashboard/connect/rules" },
           ],
         },
         {
           title: "Analytics",
-          url: "/analytics",
+          url: "/dashboard/analytics",
           icon: BarChart3,
         },
         {
           title: "Settings",
-          url: "/settings",
+          url: "/dashboard/settings",
           icon: Settings,
         },
       ],
@@ -81,7 +81,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/" className="gap-2">
+              <Link href="/dashboard/overview" className="gap-2">
                 <div className="flex aspect-square size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sidebar-accent">
                   <TraceLogo showText={false} size={26} />
                 </div>

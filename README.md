@@ -61,7 +61,7 @@ trace captures that **reasoning layer** so agents can pull relevant past context
 ### Marketing / hero imagery
 
 - **Role of the photo:** Atmospheric backdrop only. It should **not fight** the teal primary buttons and emerald logo; scenes that are **only warm tungsten / orange** read off-brand next to the UI.
-- **Current asset:** [`packages/ui/src/public/landing-bg.png`](packages/ui/src/public/landing-bg.png) — moody editorial still life. **Usable** if the page adds a **cool + subtle teal wash** over the image (done on `/landing`) so the scene harmonizes with tokens. For a tighter match long-term, **regenerate** with the prompt below (4K, cool-neutral shadows, **hint of teal** in light or bokeh only—still not sci-fi).
+- **Current asset:** [`packages/ui/src/public/landing-bg.png`](packages/ui/src/public/landing-bg.png) — moody editorial still life. **Usable** if the page adds a **cool + subtle teal wash** over the image (done on `/`) so the scene harmonizes with tokens. For a tighter match long-term, **regenerate** with the prompt below (4K, cool-neutral shadows, **hint of teal** in light or bokeh only—still not sci-fi).
 
 #### AI image prompt (4K hero, on-brand for trace)
 

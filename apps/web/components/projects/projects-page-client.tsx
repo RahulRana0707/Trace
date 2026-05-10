@@ -184,7 +184,7 @@ function ProjectGrid({ projects }: { projects: ProjectsPageClientProject[] }) {
             <CardHeader className="gap-1">
               <CardTitle className="text-base">
                 <Link
-                  href={`/memory?project=${project.id}`}
+                  href={`/dashboard/memory?project=${project.id}`}
                   className="hover:underline"
                 >
                   {project.name}
@@ -260,7 +260,7 @@ function ProjectTable({ projects }: { projects: ProjectsPageClientProject[] }) {
             </TableCell>
             <TableCell className="font-medium">
               <Link
-                href={`/memory?project=${project.id}`}
+                href={`/dashboard/memory?project=${project.id}`}
                 className="hover:underline"
               >
                 {project.name}

@@ -51,7 +51,6 @@ const data = {
           icon: Plug2,
           isActive: true,
           items: [
-            { title: "MCP", url: "/dashboard/connect/mcp" },
             { title: "API keys", url: "/dashboard/connect/api-keys" },
             { title: "Rules", url: "/dashboard/connect/rules" },
           ],

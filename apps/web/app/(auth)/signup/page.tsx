@@ -8,7 +8,7 @@ import { getServerSession } from "@/lib/get-server-session"
 export const metadata: Metadata = {
   title: "Create account",
   description:
-    "Create a trace account to store reasoning, connect MCP, and scope memory by project.",
+    "Create a trace account to store reasoning, connect agents via the API, and scope memory by project.",
 }
 
 export default async function SignupPage() {

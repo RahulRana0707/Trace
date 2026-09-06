@@ -403,7 +403,7 @@ export function AuthFormCard({ mode }: { mode: AuthMode }) {
           </CardTitle>
           <CardDescription>
             {isLogin
-              ? "Sign in to open your dashboard—projects, stored reasoning, and how agents connect via MCP."
+              ? "Sign in to open your dashboard—projects, stored reasoning, and how agents connect via the API."
               : "Join trace to give your coding agents long-term memory: intent, tradeoffs, and architecture context they can retrieve later."}
           </CardDescription>
         </CardHeader>

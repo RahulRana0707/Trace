@@ -3,11 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { clientApiFetch } from "@/lib/client-api-fetch"
-import {
-  TRACE_API_KEY_PLACEHOLDER,
-  buildHostedMcpServerJsonFragment,
-  getHostedMcpHttpUrlForSnippets,
-} from "@/lib/connect/mcp-snippet"
 import { toast } from "@trace/ui/components/sonner"
 
 export type ApiKeysPageProject = {
@@ -125,34 +120,6 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     [selectedProjectId, loadKeys]
   )
 
-  const hostedMcpEndpoint = useMemo(() => getHostedMcpHttpUrlForSnippets(), [])
-
-  const hostedMcpSnippetAvailable = Boolean(hostedMcpEndpoint)
-
-  const hostedMcpJsonWithRealSecret = useMemo(
-    () =>
-      createdSecret && selectedProjectId && hostedMcpEndpoint
-        ? buildHostedMcpServerJsonFragment({
-            mcpUrl: hostedMcpEndpoint,
-            apiKey: createdSecret,
-            projectId: selectedProjectId,
-          })
-        : "",
-    [createdSecret, selectedProjectId, hostedMcpEndpoint]
-  )
-
-  const hostedMcpJsonPlaceholder = useMemo(
-    () =>
-      selectedProjectId && hostedMcpEndpoint
-        ? buildHostedMcpServerJsonFragment({
-            mcpUrl: hostedMcpEndpoint,
-            apiKey: TRACE_API_KEY_PLACEHOLDER,
-            projectId: selectedProjectId,
-          })
-        : "",
-    [selectedProjectId, hostedMcpEndpoint]
-  )
-
   const onSuccessSheetOpenChange = useCallback((open: boolean) => {
     setSuccessOpen(open)
     if (!open) setCreatedSecret(null)
@@ -173,8 +140,5 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     createdSecret,
     handleCreateKey,
     handleRevoke,
-    hostedMcpSnippetAvailable,
-    hostedMcpJsonWithRealSecret,
-    hostedMcpJsonPlaceholder,
   }
 }

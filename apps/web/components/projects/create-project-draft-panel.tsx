@@ -124,7 +124,7 @@ export function CreateProjectDraftPanel({
               id={`${inputId}-tags`}
               value={tagsRaw}
               onChange={(e) => setTagsRaw(e.target.value)}
-              placeholder="agent, mcp, frontend"
+              placeholder="agent, backend, frontend"
             />
             <FieldDescription>Comma-separated labels.</FieldDescription>
           </Field>

@@ -1,9 +1,0 @@
-{
-  "extends": "@trace/typescript-config/base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "noEmit": false
-  },
-  "include": ["src/**/*.ts"]
-}

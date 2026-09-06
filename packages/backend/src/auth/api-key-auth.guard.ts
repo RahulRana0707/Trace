@@ -28,7 +28,7 @@ function extractBearerToken(req: Request): string | null {
   return token.length > 0 ? token : null;
 }
 
-/** Bearer trace_sk_... auth for agent/MCP-style calls — ported from apps/web/lib/agent-auth.ts. */
+/** Bearer trace_sk_... auth for agent REST calls — ported from apps/web/lib/agent-auth.ts. */
 @Injectable()
 export class ApiKeyAuthGuard implements CanActivate {
   constructor(private readonly apiKeys: ApiKeyRepository) {}

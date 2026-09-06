@@ -32,12 +32,12 @@ trace captures that **reasoning layer** so agents can pull relevant past context
 
 ## What trace does
 
-### For the agent (via MCP)
+### For the agent (via REST API)
 
 - Receives structured reasoning after significant changes.
 - Stores intent, alternatives considered, architecture impact, goals, and related metadata.
 - Returns relevant past reasoning via RAG when the agent queries it.
-- Works with MCP-compatible agents.
+- Works with any agent that can make an authenticated HTTP call (Bearer API key).
 
 ### For the developer (via dashboard)
 
@@ -86,7 +86,7 @@ Use **3840×2160** (or **3840×1600**) PNG/WebP export from a high-bitrate maste
 
 ### Phase 1 — Core (months 1–2)
 
-- MCP server agents can connect to.
+- REST API agents can connect to (Bearer API key).
 - Structured schema after each change (e.g. intent, `files_touched`, `git_commit_ref`, alternatives, architecture impact).
 - Storage: Postgres (+ pgvector for RAG when needed).
 - Basic RAG: agent queries → relevant past reasoning.
@@ -131,7 +131,7 @@ trace exists so agents can decide from **recorded reasoning**, not guesses: capt
 
 **Did the agent retrieve past context and make a better decision because of it?**
 
-Other metrics (signups, pageviews, raw entry counts) are secondary until that loop is provably working. Prefer a tight feedback path (e.g. in MCP responses) so agents or users can signal when retrieved context helped.
+Other metrics (signups, pageviews, raw entry counts) are secondary until that loop is provably working. Prefer a tight feedback path (e.g. in API responses) so agents or users can signal when retrieved context helped.
 
 ---
 
@@ -162,9 +162,9 @@ pnpm install
 
 | Path | Role |
 | --- | --- |
-| `apps/web` | Next.js dashboard and API routes. |
-| `packages/database` | Drizzle schema, queries, migrations. |
-| `packages/trace-mcp` | Hosted **Streamable HTTP** MCP server: tools use **Postgres** via `DATABASE_URL` and `@trace/database` (API key from `Authorization: Bearer`). |
+| `apps/web` | Next.js dashboard (UI only — no direct database access). |
+| `packages/backend` | NestJS API: auth, database, and all REST endpoints (dashboard + agent). |
+| `packages/database` | Drizzle schema, queries, migrations (being folded into `packages/backend`). |
 | `packages/ui` | Shared UI components and styles. |
 | `packages/eslint-config` / `packages/typescript-config` | Shared tooling configs. |
 
@@ -174,12 +174,14 @@ Build-related env vars are declared in `turbo.json` (e.g. `DATABASE_URL`, `BETTE
 
 Database scripts (`db:generate`, `db:migrate`, `db:push`, `db:studio`) live in `packages/database/package.json`.
 
-### Hosted MCP (`packages/trace-mcp`)
+### Backend API (`packages/backend`)
 
-- **`DATABASE_URL`** (required): same Postgres connection string as the web app / Drizzle migrations. The MCP process loads `@trace/database` and runs queries directly (Next.js does **not** need to be running for tool calls).
-- **`PORT`**: listen port for the MCP HTTP server (default **`8080`**). Terminate TLS at your reverse proxy in production.
-- **`.env` / cwd:** `packages/trace-mcp/src/env-guard.ts` loads `dotenv/config` first; put `DATABASE_URL` in `packages/trace-mcp/.env` when you start the process from that directory, or export it in the shell.
-- **Dashboard / copy UX:** Connect ships a hosted MCP snippet when **`NEXT_PUBLIC_TRACE_MCP_HTTP_URL`** is set for `apps/web` (absolute URL, normalized to end with `/mcp`). Snippets include **`Authorization: Bearer …`** using an API key; some setups also include optional **`X-Trace-Project-Id`**. **API keys** exposes the same hosted MCP JSON copy affordances when that URL is configured.
-- **Optional HTTP agent API:** `apps/web/app/api/agent/*` remains available for Bearer-authenticated HTTP clients; **MCP no longer calls Next** for tools.
+A NestJS app that owns auth, the database, and every REST endpoint — both the
+dashboard's (session-cookie auth) and the agent's (`Authorization: Bearer
+trace_sk_...`, see `/agent/*`). Local dev Postgres runs via `docker compose` in `packages/backend` — see
+`packages/backend/README.md` and `docs/migration/` for the backend
+consolidation history (auth, database, and REST APIs moved here from
+`apps/web` and the now-removed `trace-mcp` package).
 
-Run the MCP HTTP process locally: from repo root, `pnpm --filter @trace/trace-mcp mcp` (compile + start), or `pnpm --filter @trace/trace-mcp build` then `pnpm --filter @trace/trace-mcp serve` (see `packages/trace-mcp/package.json`). This is separate from root `pnpm dev` (Next.js only).
+Run it locally: `pnpm --filter @trace/backend dev` (separate from root
+`pnpm dev`, which starts `apps/web`).

@@ -1,11 +1,11 @@
-"use server"
-
-import { headers } from "next/headers"
-import { APIError } from "better-auth/api"
-
-import { auth } from "@/lib/auth"
 import { authClient } from "@/lib/auth-client"
 import { ServerResponseType, type ServerResponse } from "@/types/server"
+
+// Plain client-side helpers (not Server Actions) — auth now lives cross-origin
+// in packages/backend, so these must run in the browser and let authClient's
+// own fetch send/receive the cross-origin session cookie directly. Calling
+// these from a Server Action would make the request from the Next.js server
+// instead of the browser, which never receives the resulting Set-Cookie.
 
 export type SignInInput = {
   email: string
@@ -95,23 +95,21 @@ export async function signUp(input: SignUpInput): Promise<ServerResponse> {
 
 export async function signOut(): Promise<ServerResponse> {
   try {
-    const requestHeaders = await headers()
-    await auth.api.signOut({
-      headers: new Headers(requestHeaders),
-    })
+    const result = await authClient.signOut()
+
+    if (result.error) {
+      return {
+        status: ServerResponseType.ERROR,
+        data: null,
+        errorMessage: result.error.message ?? "Could not sign out.",
+      }
+    }
 
     return {
       status: ServerResponseType.SUCCESS,
       data: null,
     }
   } catch (error) {
-    if (error instanceof APIError) {
-      return {
-        status: ServerResponseType.ERROR,
-        data: null,
-        errorMessage: error.message ?? "Could not sign out.",
-      }
-    }
     console.error("signOut", error)
     return {
       status: ServerResponseType.ERROR,

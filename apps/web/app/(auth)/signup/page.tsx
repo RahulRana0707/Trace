@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { AuthFormCard } from "@/components/auth-form-card"
 import { AuthMode } from "@/lib/auth-mode"
-import { auth } from "@/lib/auth"
+import { getServerSession } from "@/lib/get-server-session"
 
 export const metadata: Metadata = {
   title: "Create account",
@@ -13,9 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default async function SignupPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getServerSession()
   if (session) {
     redirect("/dashboard/overview")
   }

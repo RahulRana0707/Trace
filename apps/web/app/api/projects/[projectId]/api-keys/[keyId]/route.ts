@@ -1,16 +1,12 @@
-import { headers } from "next/headers"
-
 import { jsonServerError, jsonSuccess } from "@/lib/api-response"
-import { auth } from "@/lib/auth"
+import { getServerSession } from "@/lib/get-server-session"
 import { revokeProjectApiKey } from "@trace/database"
 
 export async function DELETE(
   _request: Request,
   context: { params: Promise<{ projectId: string; keyId: string }> }
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getServerSession()
   if (!session) {
     return jsonServerError("Unauthorized", 401)
   }

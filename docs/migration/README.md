@@ -49,6 +49,20 @@ this plan — see [`00-current-state.md`](./00-current-state.md).
 6. [Remove trace-mcp](./06-mcp-removal.md)
 7. [Cleanup + verification](./07-cleanup-and-verification.md)
 
+## Known gap: no organization-onboarding UI
+
+Found while verifying doc 05: a brand-new signup now lands on a dashboard
+with **no active organization and no UI anywhere to create one**. The
+Organization plugin (doc 03) and the org-scoped guards (doc 04) work
+correctly — a session with no active org gets a clean 400 "No active
+organization" — but `apps/web` has no "create your first organization" flow,
+because that UI never existed before doc 02 introduced organizations. This
+isn't caused by, or fixable within, any doc in this folder — it's a genuinely
+new feature (backend already supports it: `POST /api/auth/organization/create`
+via the Organization plugin) that needs its own scoping and its own doc if/when
+you want to tackle it. Until then, new organizations have to be created by a
+direct call to that endpoint (or by hand in the database), not through the UI.
+
 ## Working agreement
 
 - Each doc has a **Status** line at the top (`Not started` / `In progress` / `Done`).

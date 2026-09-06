@@ -59,7 +59,6 @@ export type ProjectsPageClientProject = {
   metadata: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
-  ownerName: string
 }
 
 type ProjectsPageClientProps = {
@@ -208,11 +207,8 @@ function ProjectGrid({ projects }: { projects: ProjectsPageClientProject[] }) {
                   ))
                 : null}
             </CardContent>
-            <CardFooter className="mt-auto flex-col items-stretch gap-1 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:py-3">
+            <CardFooter className="mt-auto flex-col items-stretch gap-1 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:py-3">
               <span>Created {formatShortDate(project.createdAt)}</span>
-              <span className="text-foreground/80">
-                Owner · {project.ownerName}
-              </span>
             </CardFooter>
           </Card>
         </li>
@@ -238,9 +234,6 @@ function ProjectTable({ projects }: { projects: ProjectsPageClientProject[] }) {
           </TableHead>
           <TableHead scope="col" className="whitespace-nowrap">
             Created
-          </TableHead>
-          <TableHead scope="col" className="whitespace-nowrap">
-            Owner
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -287,9 +280,6 @@ function ProjectTable({ projects }: { projects: ProjectsPageClientProject[] }) {
             </TableCell>
             <TableCell className="whitespace-nowrap text-muted-foreground">
               {formatShortDate(project.createdAt)}
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {project.ownerName}
             </TableCell>
           </TableRow>
         ))}

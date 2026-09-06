@@ -1,6 +1,6 @@
 # 05 — Decouple the frontend
 
-**Status: Not started**
+**Status: Done**
 
 ## Goal
 
@@ -68,3 +68,56 @@ if done right.
 ```
 refactor(web): remove direct DB access; call backend REST API for all data
 ```
+
+## Notes from execution
+
+- **`api-client.ts` had to be two files, not one.** The plan called for a
+  single "thin API client wrapper," but a server-only helper (using
+  `next/headers` to forward the incoming request's cookie) and a
+  client-only helper (browser `credentials: "include"`) can't safely live
+  in the same module — `hooks/use-api-keys-page.ts` (a `"use client"` hook)
+  importing anything from that file pulls `next/headers` into the browser
+  bundle, and webpack fails the build outright ("You're importing a
+  component that needs next/headers"). Split into `lib/api-result.ts`
+  (shared `ApiResult<T>` type + envelope parsing, no server/client-only
+  imports), `lib/server-api-fetch.ts` (`serverApiFetch`, RSCs/route
+  handlers), and `lib/client-api-fetch.ts` (`clientApiFetch`, browser).
+- **New env vars, kept separate from the doc-03 auth ones on purpose**:
+  `BACKEND_URL`/`NEXT_PUBLIC_BACKEND_URL` for this REST client, alongside
+  the existing `BETTER_AUTH_URL`/`NEXT_PUBLIC_BETTER_AUTH_URL` for
+  `authClient`/`get-server-session.ts`/`proxy.ts`. Same value today (one
+  Nest app serves both), but named for what each caller actually needs —
+  and it meant zero risk to the already-verified doc-03 auth code.
+- **`ownerName` couldn't be preserved — it's not a UX choice, it's a data
+  model fact.** The old `serializeProject` joined `user` on
+  `project.userId` for a display name; that join is gone because projects
+  are organization-owned now (doc 02). Removed the "Owner · {name}" line
+  from the project card and the "Owner" column from the project table
+  (`components/projects/projects-page-client.tsx`), and dropped `ownerName`
+  from `lib/project-search-text.ts` and the `PostCreateProjectResponse`
+  type. Showing raw `createdByUserId` instead would have been worse UX than
+  removing the field.
+- **A real gap the migration surfaced, not something this doc caused or
+  fixes**: a brand-new signup now lands on a dashboard with **no active
+  organization and no UI anywhere to create one** — `SessionAuthGuard`
+  (doc 04) correctly 400s with "No active organization," but there is no
+  "create your first organization" flow in `apps/web`, because that UI
+  never existed before doc 02 introduced organizations at all. Verified
+  the rest of this doc's walkthrough by bootstrapping a test user's
+  organization directly via SQL (`auth.organization` + `auth.member` +
+  setting `auth.session.active_organization_id`), then driving project
+  creation, API key issuance, agent-created memory visibility, key
+  revocation, and logout through the real UI from that point. **This gap
+  needs its own follow-up** (an organization-creation/switching UI) before
+  the app is usable end-to-end by a real new user — it isn't covered by
+  any doc in this migration folder and should be scoped separately.
+- **Full walkthrough verified in a real browser** against both dev servers:
+  signup → (SQL-bootstrapped org) → create project → issue API key → agent
+  API call using that key creates a memory → memory visible on the
+  dashboard's Memory page (proving the RSC path and the agent-API path
+  read/write the same organization-scoped data) → key revoked via the same
+  `DELETE` endpoint the UI's "Revoke" button calls (verified via curl, not
+  by clicking through the UI's native `confirm()` dialog, which browser
+  automation should never trigger) → confirmed the revoked key is rejected
+  → logout, redirected away from the dashboard. No console errors during
+  the walkthrough.

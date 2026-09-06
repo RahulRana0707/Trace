@@ -1,4 +1,4 @@
-import { parseServerEnvelope } from "@/lib/api-parse"
+import { clientApiFetch } from "@/lib/client-api-fetch"
 
 export type PostCreateProjectInput = {
   name: string
@@ -7,10 +7,11 @@ export type PostCreateProjectInput = {
   tags?: string[]
 }
 
-/** Matches `serializeProject` from `POST /api/projects`. */
+/** Matches `serializeProject` from `POST /projects` (packages/backend/src/projects/serialize-project.ts). */
 export type PostCreateProjectResponse = {
   id: string
-  userId: string
+  organizationId: string
+  createdByUserId: string | null
   name: string
   description: string | null
   bannerImageUrl: string | null
@@ -19,7 +20,6 @@ export type PostCreateProjectResponse = {
   metadata: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
-  ownerName: string
 }
 
 export type PostCreateProjectResult =
@@ -51,60 +51,27 @@ export function formatCreateProjectError(data: unknown, fallback: string): strin
 export async function postCreateProject(
   input: PostCreateProjectInput
 ): Promise<PostCreateProjectResult> {
-  let res: Response
-  try {
-    res = await fetch("/api/projects", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: input.name,
-        ...(input.description ? { description: input.description } : {}),
-        ...(input.bannerGradientPreset
-          ? { bannerGradientPreset: input.bannerGradientPreset }
-          : {}),
-        ...(input.tags !== undefined ? { tags: input.tags } : {}),
-      }),
-    })
-  } catch {
+  const result = await clientApiFetch<PostCreateProjectResponse>("/projects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: input.name,
+      ...(input.description ? { description: input.description } : {}),
+      ...(input.bannerGradientPreset
+        ? { bannerGradientPreset: input.bannerGradientPreset }
+        : {}),
+      ...(input.tags !== undefined ? { tags: input.tags } : {}),
+    }),
+  })
+
+  if (!result.ok) {
     return {
       ok: false,
-      errorMessage: "Could not reach the server. Check your connection.",
-      status: 0,
-      data: null,
+      errorMessage: formatCreateProjectError(result.data, result.errorMessage),
+      status: result.status,
+      data: result.data,
     }
   }
 
-  let raw: unknown
-  try {
-    raw = await res.json()
-  } catch {
-    return {
-      ok: false,
-      errorMessage: "Invalid response from server.",
-      status: res.status,
-      data: null,
-    }
-  }
-
-  const parsed = parseServerEnvelope<PostCreateProjectResponse>(raw)
-  if (!parsed.ok) {
-    return {
-      ok: false,
-      errorMessage: formatCreateProjectError(parsed.data, parsed.errorMessage),
-      status: res.status,
-      data: parsed.data,
-    }
-  }
-
-  if (!res.ok) {
-    return {
-      ok: false,
-      errorMessage: `Request failed (${res.status}).`,
-      status: res.status,
-      data: parsed.data,
-    }
-  }
-
-  return { ok: true, project: parsed.data }
+  return { ok: true, project: result.data }
 }

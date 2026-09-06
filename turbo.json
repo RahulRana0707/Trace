@@ -10,6 +10,9 @@
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
         "BETTER_AUTH_URL",
+        "NEXT_PUBLIC_BETTER_AUTH_URL",
+        "BACKEND_URL",
+        "NEXT_PUBLIC_BACKEND_URL",
         "PORT",
         "CORS_ORIGIN"
       ],

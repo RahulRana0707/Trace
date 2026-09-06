@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@trace/database": "workspace:*",
     "@trace/ui": "workspace:*",
     "better-auth": "^1.6.9",
     "lucide-react": "^1.14.0",

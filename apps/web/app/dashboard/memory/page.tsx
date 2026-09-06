@@ -1,7 +1,6 @@
 import Link from "next/link"
 
-import { parseServerEnvelope } from "@/lib/api-parse"
-import { dashboardFetch } from "@/lib/dashboard-fetch"
+import { serverApiFetch } from "@/lib/server-api-fetch"
 import { Button } from "@trace/ui/components/button"
 import {
   Empty,
@@ -44,41 +43,24 @@ export default async function MemoryPage({
   let loadError: string | null = null
   let activeProjectId: string | null = null
 
-  try {
-    const res = await dashboardFetch("/api/projects")
-    const raw = await res.json()
-    const parsed = parseServerEnvelope<{ items: ApiProject[] }>(raw)
-    if (!res.ok || !parsed.ok) {
-      loadError =
-        parsed.ok === false
-          ? parsed.errorMessage
-          : `Could not load projects (${res.status}).`
-    } else {
-      projects = parsed.data.items ?? []
-      const chosen =
-        projects.find((p) => p.id === projectIdParam) ?? projects[0] ?? null
-      if (chosen) {
-        activeProjectId = chosen.id
-        const mRes = await dashboardFetch(
-          `/api/projects/${chosen.id}/memories?limit=25`
-        )
-        const mRaw = await mRes.json()
-        const mParsed = parseServerEnvelope<{
-          items: ApiMemory[]
-          nextCursor: string | null
-        }>(mRaw)
-        if (!mRes.ok || !mParsed.ok) {
-          loadError =
-            mParsed.ok === false
-              ? mParsed.errorMessage
-              : `Could not load memories (${mRes.status}).`
-        } else {
-          memories = mParsed.data.items ?? []
-        }
+  const projectsResult = await serverApiFetch<{ items: ApiProject[] }>("/projects")
+  if (!projectsResult.ok) {
+    loadError = projectsResult.errorMessage
+  } else {
+    projects = projectsResult.data.items ?? []
+    const chosen = projects.find((p) => p.id === projectIdParam) ?? projects[0] ?? null
+    if (chosen) {
+      activeProjectId = chosen.id
+      const memoriesResult = await serverApiFetch<{
+        items: ApiMemory[]
+        nextCursor: string | null
+      }>(`/projects/${chosen.id}/memories?limit=25`)
+      if (!memoriesResult.ok) {
+        loadError = memoriesResult.errorMessage
+      } else {
+        memories = memoriesResult.data.items ?? []
       }
     }
-  } catch {
-    loadError = "Could not load memory."
   }
 
   return (

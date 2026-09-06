@@ -1,11 +1,12 @@
 
 
+// Server-only vars (RSCs, route handlers, proxy.ts) are unprefixed — Next.js
+// never inlines those into the browser bundle. Anything read from a "use
+// client" component (lib/auth-client.ts, lib/client-api-fetch.ts)
+// needs the NEXT_PUBLIC_ variant instead.
 export const env = {
-  DATABASE_URL: process.env.DATABASE_URL!,
-  // Points at the backend (packages/backend) now that auth lives there.
-  // Server-side use only (RSCs, route handlers, proxy.ts) — Next.js does not
-  // inline unprefixed vars into the browser bundle. lib/auth-client.ts (which
-  // runs in the browser) needs NEXT_PUBLIC_BETTER_AUTH_URL instead.
   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL!,
   NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL!,
+  BACKEND_URL: process.env.BACKEND_URL!,
+  NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL!,
 }

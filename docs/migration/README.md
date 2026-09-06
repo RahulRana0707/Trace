@@ -49,6 +49,7 @@ this plan — see [`00-current-state.md`](./00-current-state.md).
 6. [Remove trace-mcp](./06-mcp-removal.md) — **partially superseded by doc 08**, see below
 7. [Cleanup + verification](./07-cleanup-and-verification.md) — still pending, independent of doc 08
 8. [Bring MCP back as a thin Streamable HTTP endpoint](./08-mcp-streamable-http.md)
+9. [Organization onboarding journey](./09-onboarding-journey.md) — closes the known gap below
 
 ## Why doc 08 exists — the MCP decision changed after doc 06 shipped
 
@@ -65,19 +66,19 @@ calling the exact same repositories/services the REST controllers use — not
 a standalone package, and not touching the database on its own. REST stays;
 this is additive, not a full reversal.
 
-## Known gap: no organization-onboarding UI
+## Known gap: no organization-onboarding UI — closed by doc 09
 
-Found while verifying doc 05: a brand-new signup now lands on a dashboard
-with **no active organization and no UI anywhere to create one**. The
-Organization plugin (doc 03) and the org-scoped guards (doc 04) work
-correctly — a session with no active org gets a clean 400 "No active
-organization" — but `apps/web` has no "create your first organization" flow,
-because that UI never existed before doc 02 introduced organizations. This
-isn't caused by, or fixable within, any doc in this folder — it's a genuinely
-new feature (backend already supports it: `POST /api/auth/organization/create`
-via the Organization plugin) that needs its own scoping and its own doc if/when
-you want to tackle it. Until then, new organizations have to be created by a
-direct call to that endpoint (or by hand in the database), not through the UI.
+Found while verifying doc 05: a brand-new signup landed on a dashboard with
+**no active organization and no UI anywhere to create one**. The Organization
+plugin (doc 03) and the org-scoped guards (doc 04) worked correctly — a
+session with no active org got a clean 400 "No active organization" — but
+`apps/web` had no "create your first organization" flow, because that UI
+never existed before doc 02 introduced organizations. Doc 09 closed this gap
+for real: a centered onboarding wizard now runs `proxy.ts`-gated for every
+new signup (email or OAuth), creates the organization via
+`authClient.organization.create` + `setActive`, and lands the user on the
+dashboard — verified end-to-end in a real browser, including the
+all-optional-steps-skipped path.
 
 ## Working agreement
 

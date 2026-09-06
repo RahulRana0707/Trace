@@ -23,6 +23,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
+  // New signups have a session but no organization yet — send them through
+  // onboarding before any dashboard route, regardless of which auth path
+  // got them here (email, GitHub, Google all land here identically).
+  const hasActiveOrganization = Boolean(session.session?.activeOrganizationId)
+  if (!hasActiveOrganization && pathname !== "/onboarding") {
+    return NextResponse.redirect(new URL("/onboarding", request.url))
+  }
+  if (hasActiveOrganization && pathname === "/onboarding") {
+    return NextResponse.redirect(new URL("/dashboard/overview", request.url))
+  }
+
   return NextResponse.next()
 }
 

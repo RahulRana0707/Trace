@@ -164,24 +164,25 @@ pnpm install
 | --- | --- |
 | `apps/web` | Next.js dashboard (UI only — no direct database access). |
 | `packages/backend` | NestJS API: auth, database, and all REST endpoints (dashboard + agent). |
-| `packages/database` | Drizzle schema, queries, migrations (being folded into `packages/backend`). |
 | `packages/ui` | Shared UI components and styles. |
 | `packages/eslint-config` / `packages/typescript-config` | Shared tooling configs. |
 
 ### Environment
 
-Build-related env vars are declared in `turbo.json` (e.g. `DATABASE_URL`, `BETTER_AUTH_URL`, OAuth client IDs/secrets). Configure `.env` locally for `apps/web` and database tooling as needed.
+Build-related env vars are declared in `turbo.json` (e.g. `DATABASE_URL`, `BETTER_AUTH_URL`, OAuth client IDs/secrets). Configure `.env` locally for `apps/web` and `packages/backend` as needed.
 
-Database scripts (`db:generate`, `db:migrate`, `db:push`, `db:studio`) live in `packages/database/package.json`.
+Database scripts (`db:generate`, `db:migrate`, `db:push`, `db:studio`) live in `packages/backend/package.json`.
 
 ### Backend API (`packages/backend`)
 
 A NestJS app that owns auth, the database, and every REST endpoint — both the
 dashboard's (session-cookie auth) and the agent's (`Authorization: Bearer
-trace_sk_...`, see `/agent/*`). Local dev Postgres runs via `docker compose` in `packages/backend` — see
-`packages/backend/README.md` and `docs/migration/` for the backend
-consolidation history (auth, database, and REST APIs moved here from
-`apps/web` and the now-removed `trace-mcp` package).
+trace_sk_...`, see `/agent/*`), plus a Streamable HTTP MCP endpoint
+(`POST /mcp`) sharing the same repositories. Local dev Postgres runs via
+`docker compose` in `packages/backend` — see `packages/backend/README.md`
+and `docs/migration/` for the backend consolidation history (auth, database,
+and REST APIs moved here from `apps/web`; the standalone `@trace/database`
+and `trace-mcp` packages are gone).
 
 Run it locally: `pnpm --filter @trace/backend dev` (separate from root
 `pnpm dev`, which starts `apps/web`).

@@ -47,9 +47,16 @@ this plan — see [`00-current-state.md`](./00-current-state.md).
 4. [Build the REST API surface](./04-rest-api-surface.md)
 5. [Decouple the frontend](./05-frontend-decoupling.md)
 6. [Remove trace-mcp](./06-mcp-removal.md) — **partially superseded by doc 08**, see below
-7. [Cleanup + verification](./07-cleanup-and-verification.md) — still pending, independent of doc 08
+7. [Cleanup + verification](./07-cleanup-and-verification.md)
 8. [Bring MCP back as a thin Streamable HTTP endpoint](./08-mcp-streamable-http.md)
 9. [Organization onboarding journey](./09-onboarding-journey.md) — closes the known gap below
+
+All nine docs are Done. Two items remain open, tracked outside this
+migration's doc sequence rather than blocking it: GitHub/Google OAuth
+round-trips are structurally verified (doc 03's plugin wiring) but were never
+exercised end-to-end locally, since no OAuth app credentials exist in this
+dev environment; and a dashboard "Connect → MCP" page (deferred in doc 08)
+hasn't been rebuilt yet now that MCP lives in the backend again.
 
 ## Why doc 08 exists — the MCP decision changed after doc 06 shipped
 

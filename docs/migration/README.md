@@ -14,7 +14,7 @@ ones are done.
 
 | Decision | Choice |
 |---|---|
-| MCP protocol support | **Removed entirely.** `packages/trace-mcp` goes away. Agents integrate over plain REST with a Bearer API key. No MCP adapter, thin or otherwise. |
+| MCP protocol support | **Superseded by doc 08 — see below.** Originally "removed entirely" (doc 06); revisited after doc 06 shipped and changed to "thin Streamable HTTP endpoint inside `packages/backend`, REST stays too." |
 | Auth cookies across frontend/backend | **True cross-origin.** Frontend (`apps/web`, Next.js) and backend (`packages/backend`, Nest) stay on separate origins/ports. Backend sets cookies via CORS with credentials + `SameSite=None; Secure`. No Next.js rewrite/proxy layer. |
 | Docker Compose scope | **Postgres only.** `packages/backend/docker-compose.yml` runs just a `postgres` container. Nest and Next both keep running natively via `pnpm`/`turbo dev`. |
 | Existing local DB data | **Start fresh.** The Dockerized Postgres starts empty; migrations recreate the schema. Your current native `localhost:5432` data is left alone, not copied in. |
@@ -46,8 +46,24 @@ this plan — see [`00-current-state.md`](./00-current-state.md).
 3. [Move auth into the backend](./03-auth-migration.md)
 4. [Build the REST API surface](./04-rest-api-surface.md)
 5. [Decouple the frontend](./05-frontend-decoupling.md)
-6. [Remove trace-mcp](./06-mcp-removal.md)
-7. [Cleanup + verification](./07-cleanup-and-verification.md)
+6. [Remove trace-mcp](./06-mcp-removal.md) — **partially superseded by doc 08**, see below
+7. [Cleanup + verification](./07-cleanup-and-verification.md) — still pending, independent of doc 08
+8. [Bring MCP back as a thin Streamable HTTP endpoint](./08-mcp-streamable-http.md)
+
+## Why doc 08 exists — the MCP decision changed after doc 06 shipped
+
+Doc 06 removed MCP entirely, on the original stated decision ("no MCP
+adapter, thin or otherwise"). After doc 06 was done, revisiting it surfaced
+that the *original* `trace-mcp` (before deletion) already used the correct
+transport — **Streamable HTTP** (`StreamableHTTPServerTransport`, a `POST
+/mcp` endpoint, Bearer-token auth) — not stdio. The actual objection wasn't
+to MCP's transport; it was to `trace-mcp` being a **separate package that
+queried Postgres directly**, duplicating the backend's own data-access
+logic. Doc 08 brings MCP back the way doc 03's "thin proxy" alternative
+originally proposed: as one more transport *inside* `packages/backend`,
+calling the exact same repositories/services the REST controllers use — not
+a standalone package, and not touching the database on its own. REST stays;
+this is additive, not a full reversal.
 
 ## Known gap: no organization-onboarding UI
 

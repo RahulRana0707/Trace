@@ -18,6 +18,11 @@ ones are done.
 | Auth cookies across frontend/backend | **True cross-origin.** Frontend (`apps/web`, Next.js) and backend (`packages/backend`, Nest) stay on separate origins/ports. Backend sets cookies via CORS with credentials + `SameSite=None; Secure`. No Next.js rewrite/proxy layer. |
 | Docker Compose scope | **Postgres only.** `packages/backend/docker-compose.yml` runs just a `postgres` container. Nest and Next both keep running natively via `pnpm`/`turbo dev`. |
 | Existing local DB data | **Start fresh.** The Dockerized Postgres starts empty; migrations recreate the schema. Your current native `localhost:5432` data is left alone, not copied in. |
+| Schema organization | **Postgres schema namespaces**, not just file grouping. Tables live in two real Postgres schemas via Drizzle's `pgSchema()`: `auth` (user, session, account, verification, organization, member, invitation) and `core` (project, memoryEntry, projectApiKey). Shows up as real namespaces in `\dn`/`\dt`. |
+| Organization/multi-tenancy | **better-auth's official Organization plugin**, not hand-rolled tables. Its plugin prescribes an exact schema for `organization`/`member`/`invitation` (see doc 02) plus a `session.activeOrganizationId` column — we match that shape exactly so the plugin (wired in doc 03) works against these tables with zero adapter overrides. |
+| Project ownership / tenancy boundary | **Organization-owned.** `project.organizationId` is the tenancy boundary (replaces `project.userId`); `project.createdByUserId` is kept as a nullable audit-only field. `memoryEntry` and `projectApiKey` also get a denormalized `organizationId` (not just via a `project` join) so every query can filter on it directly — see doc 02's rationale. |
+
+These three rows were added mid-migration, after doc 01 was already committed — see doc 02 for the full schema and the reasoning behind the denormalized `organizationId` columns.
 
 ## Target architecture (after the migration)
 

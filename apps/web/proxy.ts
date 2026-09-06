@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { env } from "@/lib/env"
 
 const PUBLIC_ROUTES = ["/login", "/signup"]
 
@@ -11,12 +10,28 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
+  // Auth lives cross-origin (packages/backend) now — forward the incoming
+  // request's cookie directly rather than going through next/headers.
+  const cookie = request.headers.get("cookie")
+  const response = await fetch(`${env.BETTER_AUTH_URL}/api/auth/get-session`, {
+    headers: cookie ? { cookie } : undefined,
+    cache: "no-store",
   })
+  const session = response.ok ? await response.json() : null
 
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  // New signups have a session but no organization yet — send them through
+  // onboarding before any dashboard route, regardless of which auth path
+  // got them here (email, GitHub, Google all land here identically).
+  const hasActiveOrganization = Boolean(session.session?.activeOrganizationId)
+  if (!hasActiveOrganization && pathname !== "/onboarding") {
+    return NextResponse.redirect(new URL("/onboarding", request.url))
+  }
+  if (hasActiveOrganization && pathname === "/onboarding") {
+    return NextResponse.redirect(new URL("/dashboard/overview", request.url))
   }
 
   return NextResponse.next()

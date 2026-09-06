@@ -1,6 +1,5 @@
 import { ApiKeysPageClient } from "@/components/connect/api-keys-page-client"
-import { parseServerEnvelope } from "@/lib/api-parse"
-import { dashboardFetch } from "@/lib/dashboard-fetch"
+import { serverApiFetch } from "@/lib/server-api-fetch"
 
 type ApiProject = {
   id: string
@@ -11,23 +10,11 @@ export default async function ConnectApiKeysPage() {
   let projects: ApiProject[] = []
   let projectsLoadError: string | null = null
 
-  try {
-    const res = await dashboardFetch("/api/projects")
-    const raw = await res.json()
-    const parsed = parseServerEnvelope<{ items: ApiProject[] }>(raw)
-    if (!res.ok || !parsed.ok) {
-      projectsLoadError =
-        parsed.ok === false
-          ? parsed.errorMessage
-          : `Could not load projects (${res.status}).`
-    } else {
-      projects = (parsed.data.items ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-      }))
-    }
-  } catch {
-    projectsLoadError = "Could not load projects."
+  const result = await serverApiFetch<{ items: ApiProject[] }>("/projects")
+  if (!result.ok) {
+    projectsLoadError = result.errorMessage
+  } else {
+    projects = (result.data.items ?? []).map((p) => ({ id: p.id, name: p.name }))
   }
 
   return (

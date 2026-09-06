@@ -110,9 +110,6 @@ export function ApiKeysPageClient({
     createdSecret,
     handleCreateKey,
     handleRevoke,
-    hostedMcpSnippetAvailable,
-    hostedMcpJsonWithRealSecret,
-    hostedMcpJsonPlaceholder,
   } = useApiKeysPage({ projects })
 
   if (projectsLoadError) {
@@ -277,19 +274,6 @@ export function ApiKeysPageClient({
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {active && selectedProjectId ? (
-                              <>
-                                {hostedMcpSnippetAvailable ? (
-                                  <CopyButton
-                                    label="hosted MCP JSON"
-                                    text={hostedMcpJsonPlaceholder}
-                                    variant="secondary"
-                                  >
-                                    Copy hosted MCP JSON
-                                  </CopyButton>
-                                ) : null}
-                              </>
-                            ) : null}
                             {active ? (
                               <Button
                                 type="button"
@@ -343,21 +327,6 @@ export function ApiKeysPageClient({
                   </code>
                   <CopyButton label="project ID" text={selectedProjectId} />
                 </div>
-              </div>
-            ) : null}
-            {hostedMcpSnippetAvailable && hostedMcpJsonWithRealSecret ? (
-              <div className="flex flex-col gap-2">
-                <Label>MCP JSON (hosted URL)</Label>
-                <pre className="max-h-48 overflow-auto rounded-md border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
-                  {hostedMcpJsonWithRealSecret}
-                </pre>
-                <CopyButton
-                  label="MCP JSON (hosted)"
-                  text={hostedMcpJsonWithRealSecret}
-                  variant="default"
-                >
-                  Copy hosted MCP JSON
-                </CopyButton>
               </div>
             ) : null}
           </div>

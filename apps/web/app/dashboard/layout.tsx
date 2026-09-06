@@ -1,8 +1,7 @@
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
-import { auth } from "@/lib/auth"
+import { getServerSession } from "@/lib/get-server-session"
 import { getUserData } from "@/lib/get-user-data"
 
 export default async function DashboardLayout({
@@ -10,9 +9,7 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getServerSession()
 
   if (!session) {
     redirect("/login")

@@ -30,36 +30,33 @@ Rules and install snippets for this editor are not available yet. Use **Cursor**
 export const RULE_MARKDOWN_BY_TOOL: Record<RuleToolId, string> = {
   cursor: `## trace — agent rules (Cursor)
 
-You are working in a repo that uses **trace** for long-term **decision memory** (intent, tradeoffs, architecture—not just diffs). Connect the **trace MCP** so you can call the tools below.
+You are working in a repo that uses **trace** for long-term **decision memory** (intent, tradeoffs, architecture—not just diffs). Call trace's **REST API** directly (e.g. via \`curl\`) using the endpoints below.
 
-### MCP setup
+### REST API setup
 
-Use **Hosted MCP (Streamable HTTP)**.
+Get your API key from the trace dashboard (**Connect → API keys**) and your project's base URL from the same page. Send it as an **Authorization: Bearer …** header on every request below.
 
-Copy the configuration snippet from the trace dashboard (**Connect → MCP**) into Cursor MCP settings. It includes the MCP endpoint URL and an **Authorization: Bearer …** header using your API key (**Connect → API keys**).
+Some setups also accept an optional **\`X-Trace-Project-Id\`** header. If present, it must match the project bound to your API key.
 
-Some setups include optional headers such as **\`X-Trace-Project-Id\`**. If present, it must match the project bound to your API key.
+### Endpoints (exact paths)
 
-### MCP tools (exact names)
+Use only these endpoints:
 
-Use only these tool names:
-
-| Tool | Purpose |
+| Method & path | Purpose |
 |------|---------|
-| \`trace_ping\` | Cheap health check; confirms API key context and returns bound \`projectId\`. |
-| \`trace_store_memory\` | **Write** memory: required \`intent\`; optional \`alternativesConsidered\`, \`architectureImpact\`, \`filesTouched\`, \`gitCommitRef\`, \`metadata\`. |
-| \`trace_search_memory\` | **Search** (keyword): \`query\`, optional \`limit\` (≤25). |
-| \`trace_get_memory\` | **Get** one entry by \`id\`. |
-| \`trace_list_recent\` | **List** newest first: optional \`limit\`, \`cursor\`. |
-| \`trace_list_memories\` | Same list as \`trace_list_recent\`; project comes from the API key. |
+| \`GET /agent/ping\` | Cheap health check; confirms API key context and returns bound \`projectId\`. |
+| \`POST /agent/memories\` | **Write** memory: body \`{ intent }\` required; optional \`alternativesConsidered\`, \`architectureImpact\`, \`filesTouched\`, \`gitCommitRef\`, \`metadata\`. |
+| \`POST /agent/memories/search\` | **Search** (keyword): body \`{ query }\` required, optional \`limit\` (≤25). |
+| \`GET /agent/memories/:memoryId\` | **Get** one entry by id. |
+| \`GET /agent/memories?limit=&cursor=\` | **List** newest first: optional \`limit\`, \`cursor\`. |
 
 ### When to write memory
 
-After **meaningful** changes—not every tiny edit—call **\`trace_store_memory\`**. Include intent, alternatives, architecture impact, important paths, git ref when useful. Skip trivial edits.
+After **meaningful** changes—not every tiny edit—call **\`POST /agent/memories\`**. Include intent, alternatives, architecture impact, important paths, git ref when useful. Skip trivial edits.
 
 ### When to read memory
 
-Before large refactors, API changes, dependency upgrades, or when the user asks what was decided before, use **\`trace_search_memory\`**, **\`trace_list_recent\`**, **\`trace_list_memories\`**, or **\`trace_get_memory\`** and **summarize** in your reply. Do not paste huge payloads unless the user needs them.
+Before large refactors, API changes, dependency upgrades, or when the user asks what was decided before, use **\`POST /agent/memories/search\`**, **\`GET /agent/memories\`**, or **\`GET /agent/memories/:memoryId\`** and **summarize** in your reply. Do not paste huge payloads unless the user needs them.
 
 ### Tone and safety
 

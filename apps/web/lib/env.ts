@@ -1,10 +1,12 @@
 
 
+// Server-only vars (RSCs, route handlers, proxy.ts) are unprefixed — Next.js
+// never inlines those into the browser bundle. Anything read from a "use
+// client" component (lib/auth-client.ts, lib/client-api-fetch.ts)
+// needs the NEXT_PUBLIC_ variant instead.
 export const env = {
-  DATABASE_URL: process.env.DATABASE_URL!,
   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL!,
-  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
-  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
+  NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL!,
+  BACKEND_URL: process.env.BACKEND_URL!,
+  NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL!,
 }

@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { parseServerEnvelope } from "@/lib/api-parse"
-import {
-  TRACE_API_KEY_PLACEHOLDER,
-  buildHostedMcpServerJsonFragment,
-  getHostedMcpHttpUrlForSnippets,
-} from "@/lib/connect/mcp-snippet"
+import { clientApiFetch } from "@/lib/client-api-fetch"
 import { toast } from "@trace/ui/components/sonner"
 
 export type ApiKeysPageProject = {
@@ -52,28 +47,15 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     }
     setKeysLoading(true)
     setKeysError(null)
-    try {
-      const res = await fetch(`/api/projects/${projectId}/api-keys`, {
-        credentials: "same-origin",
-      })
-      const raw: unknown = await res.json()
-      const parsed = parseServerEnvelope<{ items: ApiKeyRow[] }>(raw)
-      if (!res.ok || !parsed.ok) {
-        setKeysError(
-          parsed.ok === false
-            ? parsed.errorMessage
-            : `Could not load keys (${res.status}).`
-        )
-        setKeys([])
-        return
-      }
-      setKeys(parsed.data.items ?? [])
-    } catch {
-      setKeysError("Could not load keys.")
+    const result = await clientApiFetch<{ items: ApiKeyRow[] }>(`/projects/${projectId}/api-keys`)
+    if (!result.ok) {
+      setKeysError(result.errorMessage)
       setKeys([])
-    } finally {
       setKeysLoading(false)
+      return
     }
+    setKeys(result.data.items ?? [])
+    setKeysLoading(false)
   }, [])
 
   useEffect(() => {
@@ -94,41 +76,24 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
   const handleCreateKey = useCallback(async () => {
     if (!selectedProjectId) return
     setCreating(true)
-    try {
-      const res = await fetch(
-        `/api/projects/${selectedProjectId}/api-keys`,
-        {
-          method: "POST",
-          credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: newKeyName.trim() || undefined,
-          }),
-        }
-      )
-      const raw: unknown = await res.json()
-      const parsed = parseServerEnvelope<{
-        id: string
-        projectId: string
-        secret: string
-      }>(raw)
-      if (!res.ok || !parsed.ok) {
-        toast.error(
-          parsed.ok === false
-            ? parsed.errorMessage
-            : `Could not create key (${res.status}).`
-        )
-        return
+    const result = await clientApiFetch<{ id: string; projectId: string; secret: string }>(
+      `/projects/${selectedProjectId}/api-keys`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newKeyName.trim() || undefined }),
       }
-      setCreatedSecret(parsed.data.secret)
-      setSuccessOpen(true)
-      setNewKeyName("")
-      await loadKeys(selectedProjectId)
-    } catch {
-      toast.error("Could not create key.")
-    } finally {
+    )
+    if (!result.ok) {
+      toast.error(result.errorMessage)
       setCreating(false)
+      return
     }
+    setCreatedSecret(result.data.secret)
+    setSuccessOpen(true)
+    setNewKeyName("")
+    await loadKeys(selectedProjectId)
+    setCreating(false)
   }, [selectedProjectId, newKeyName, loadKeys])
 
   const handleRevoke = useCallback(
@@ -141,56 +106,18 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
       ) {
         return
       }
-      try {
-        const res = await fetch(
-          `/api/projects/${selectedProjectId}/api-keys/${keyId}`,
-          { method: "DELETE", credentials: "same-origin" }
-        )
-        const raw: unknown = await res.json()
-        const parsed = parseServerEnvelope<{ revoked: boolean }>(raw)
-        if (!res.ok || !parsed.ok) {
-          toast.error(
-            parsed.ok === false
-              ? parsed.errorMessage
-              : `Could not revoke (${res.status}).`
-          )
-          return
-        }
-        toast.success("Key revoked")
-        await loadKeys(selectedProjectId)
-      } catch {
-        toast.error("Could not revoke key.")
+      const result = await clientApiFetch<{ revoked: boolean }>(
+        `/projects/${selectedProjectId}/api-keys/${keyId}`,
+        { method: "DELETE" }
+      )
+      if (!result.ok) {
+        toast.error(result.errorMessage)
+        return
       }
+      toast.success("Key revoked")
+      await loadKeys(selectedProjectId)
     },
     [selectedProjectId, loadKeys]
-  )
-
-  const hostedMcpEndpoint = useMemo(() => getHostedMcpHttpUrlForSnippets(), [])
-
-  const hostedMcpSnippetAvailable = Boolean(hostedMcpEndpoint)
-
-  const hostedMcpJsonWithRealSecret = useMemo(
-    () =>
-      createdSecret && selectedProjectId && hostedMcpEndpoint
-        ? buildHostedMcpServerJsonFragment({
-            mcpUrl: hostedMcpEndpoint,
-            apiKey: createdSecret,
-            projectId: selectedProjectId,
-          })
-        : "",
-    [createdSecret, selectedProjectId, hostedMcpEndpoint]
-  )
-
-  const hostedMcpJsonPlaceholder = useMemo(
-    () =>
-      selectedProjectId && hostedMcpEndpoint
-        ? buildHostedMcpServerJsonFragment({
-            mcpUrl: hostedMcpEndpoint,
-            apiKey: TRACE_API_KEY_PLACEHOLDER,
-            projectId: selectedProjectId,
-          })
-        : "",
-    [selectedProjectId, hostedMcpEndpoint]
   )
 
   const onSuccessSheetOpenChange = useCallback((open: boolean) => {
@@ -213,8 +140,5 @@ export function useApiKeysPage({ projects }: UseApiKeysPageArgs) {
     createdSecret,
     handleCreateKey,
     handleRevoke,
-    hostedMcpSnippetAvailable,
-    hostedMcpJsonWithRealSecret,
-    hostedMcpJsonPlaceholder,
   }
 }

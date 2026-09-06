@@ -1,6 +1,5 @@
 import { ProjectsPageClient } from "@/components/projects/projects-page-client"
-import { parseServerEnvelope } from "@/lib/api-parse"
-import { dashboardFetch } from "@/lib/dashboard-fetch"
+import { serverApiFetch } from "@/lib/server-api-fetch"
 
 type ApiProject = {
   id: string
@@ -12,27 +11,17 @@ type ApiProject = {
   metadata: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
-  ownerName: string
 }
 
 export default async function ProjectsPage() {
   let items: ApiProject[] = []
   let loadError: string | null = null
 
-  try {
-    const res = await dashboardFetch("/api/projects")
-    const raw = await res.json()
-    const parsed = parseServerEnvelope<{ items: ApiProject[] }>(raw)
-    if (!res.ok || !parsed.ok) {
-      loadError =
-        parsed.ok === false
-          ? parsed.errorMessage
-          : `Could not load projects (${res.status}).`
-    } else {
-      items = parsed.data.items ?? []
-    }
-  } catch {
-    loadError = "Could not load projects."
+  const result = await serverApiFetch<{ items: ApiProject[] }>("/projects")
+  if (!result.ok) {
+    loadError = result.errorMessage
+  } else {
+    items = result.data.items ?? []
   }
 
   return (

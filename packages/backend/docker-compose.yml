@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trace
+      POSTGRES_PASSWORD: trace
+      POSTGRES_DB: trace
+    ports:
+      - "55432:5432"
+    volumes:
+      - trace_backend_pgdata:/var/lib/postgresql/data
+
+volumes:
+  trace_backend_pgdata:

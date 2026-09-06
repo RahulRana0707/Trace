@@ -1,5 +1,4 @@
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getServerSession } from "@/lib/get-server-session"
 
 export type UserData = {
   id: string
@@ -9,9 +8,7 @@ export type UserData = {
 }
 
 export const getUserData = async (): Promise<UserData | null> => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getServerSession()
 
   if (!session) {
     return null

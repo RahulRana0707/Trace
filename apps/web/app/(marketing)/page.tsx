@@ -1,17 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
-import { headers } from "next/headers"
 
 import landingBg from "@trace/ui/public/landing-bg.png"
 import { TraceLogo } from "@trace/ui/components/logo"
 import { Button } from "@trace/ui/components/button"
 import { cn } from "@trace/ui/lib/utils"
-import { auth } from "@/lib/auth"
+import { getServerSession } from "@/lib/get-server-session"
 
 export default async function LandingPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getServerSession()
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">

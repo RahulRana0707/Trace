@@ -21,7 +21,6 @@ const ROUTE_BREADCRUMBS: Record<string, DashboardBreadcrumbSegment[]> = {
   "/dashboard/overview": [{ label: "Overview" }],
   "/dashboard/projects": [OVERVIEW, { label: "Projects" }],
   "/dashboard/memory": [OVERVIEW, { label: "Memory" }],
-  "/dashboard/connect/mcp": [OVERVIEW, { label: "Connect" }, { label: "MCP" }],
   "/dashboard/connect/api-keys": [
     OVERVIEW,
     { label: "Connect" },

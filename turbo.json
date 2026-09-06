@@ -9,7 +9,9 @@
         "GITHUB_CLIENT_SECRET",
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
-        "BETTER_AUTH_URL"
+        "BETTER_AUTH_URL",
+        "PORT",
+        "CORS_ORIGIN"
       ],
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],

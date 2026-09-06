@@ -1,0 +1,56 @@
+# Trace backend consolidation — migration journey
+
+This folder is the working plan for moving Trace from "Next.js app talking directly
+to a shared `@trace/database` package, plus a separate `trace-mcp` MCP server" to
+"one NestJS backend that owns auth + database + all REST APIs, with the Next.js
+app as a pure API client."
+
+Read this file first, then work through `01`–`07` **in order, one at a time**.
+Each numbered doc is sized to be one commit (occasionally two). Don't start
+doc `N+1` until `N`'s acceptance criteria pass — later docs assume earlier
+ones are done.
+
+## Decisions already locked in (don't relitigate these mid-migration)
+
+| Decision | Choice |
+|---|---|
+| MCP protocol support | **Removed entirely.** `packages/trace-mcp` goes away. Agents integrate over plain REST with a Bearer API key. No MCP adapter, thin or otherwise. |
+| Auth cookies across frontend/backend | **True cross-origin.** Frontend (`apps/web`, Next.js) and backend (`packages/backend`, Nest) stay on separate origins/ports. Backend sets cookies via CORS with credentials + `SameSite=None; Secure`. No Next.js rewrite/proxy layer. |
+| Docker Compose scope | **Postgres only.** `packages/backend/docker-compose.yml` runs just a `postgres` container. Nest and Next both keep running natively via `pnpm`/`turbo dev`. |
+| Existing local DB data | **Start fresh.** The Dockerized Postgres starts empty; migrations recreate the schema. Your current native `localhost:5432` data is left alone, not copied in. |
+
+## Target architecture (after the migration)
+
+```mermaid
+graph LR
+    Dev["Developer (browser)"] -->|"cross-origin fetch<br/>credentials: include"| Web["apps/web<br/>Next.js — UI only,<br/>no DB/auth logic"]
+    Agent["AI coding agent"] -->|"Bearer trace_sk_...<br/>REST"| BE
+
+    Web -->|"REST + cookies<br/>CORS credentialed"| BE["packages/backend<br/>NestJS — owns auth,<br/>database, all REST APIs"]
+    BE -->|drizzle| PG[("Postgres<br/>(Docker Compose, local dev)")]
+```
+
+Compare against the current architecture documented from the codebase as of
+this plan — see [`00-current-state.md`](./00-current-state.md).
+
+## The journeys
+
+0. [Current state (reference, no changes)](./00-current-state.md)
+1. [Workspace + Docker foundations](./01-workspace-and-docker-foundations.md)
+2. [Move the database into the backend](./02-database-module-migration.md)
+3. [Move auth into the backend](./03-auth-migration.md)
+4. [Build the REST API surface](./04-rest-api-surface.md)
+5. [Decouple the frontend](./05-frontend-decoupling.md)
+6. [Remove trace-mcp](./06-mcp-removal.md)
+7. [Cleanup + verification](./07-cleanup-and-verification.md)
+
+## Working agreement
+
+- Each doc has a **Status** line at the top (`Not started` / `In progress` / `Done`).
+  Flip it as we go so re-reading this folder cold always shows real progress,
+  not just the plan.
+- Each doc lists a **suggested commit message** — use it as-is or adapt, but
+  keep sub-journeys in separate commits so they're easy to review/revert
+  independently.
+- If a step turns out to be wrong or a decision above needs to change, edit
+  this README's decision table and the affected doc — don't silently drift.
